@@ -3,7 +3,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-
 from .models import Liquor
 from .serializers import LiquorListSerializer, LiquorDetailSerializer
 
@@ -20,6 +19,7 @@ class LiquorListView(APIView):
         return Response(serializer.data)
 
     # def post(self, request):
+        
     #     serializer=LiquorListSerializer(data=request.data)
 
 
@@ -29,7 +29,9 @@ class LiquorDetailView(APIView):
         IsAuthenticatedOrReadOnly
     ]  # 관리자만 가능 or 누구나 이용 가능
 
-    def get(self, request):
-        liquors = Liquor.objects.all()
+    def get(self, request,id):
+        get_object_or_404(Liquor, id=id)
         serializer = LiquorDetailSerializer(liquors)
         return Response(serializer.data)
+
+    # 수정, 삭제를 여기에 해야하지 않을까
