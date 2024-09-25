@@ -55,24 +55,12 @@ class User(AbstractBaseUser):
         self.save()
 
 
-class BaseLiquorModel(models.Model):
+class My_Liquor(models.Model):
+    status_choices = [("1", "내가 보유한 술"),
+                      ("2", "좋아하는 술"), ("3", "싫어하는 술")]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
-
-    class Meta:
-        abstract = True
-
-
-class MyLiquor(BaseLiquorModel):
     liquor = models.ForeignKey(
         Liquor, on_delete=models.CASCADE, related_name='my_liquor')
-
-
-class LikeLiquor(BaseLiquorModel):
-    liquor = models.ForeignKey(
-        Liquor, on_delete=models.CASCADE, related_name='like_liquor')
-
-
-class DislikeLiquor(BaseLiquorModel):
-    liquor = models.ForeignKey(
-        Liquor, on_delete=models.CASCADE, related_name='dislike_liquor')
+    status = models.CharField(max_length=1, choices=status_choices)
