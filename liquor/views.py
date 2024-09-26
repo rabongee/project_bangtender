@@ -10,9 +10,7 @@ from .serializers import LiquorListSerializer, LiquorDetailSerializer
 
 # 주류 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
 class LiquorListView(APIView):
-    permission_classes = [
-        IsAuthenticatedOrReadOnly
-    ]  # 관리자만 가능 or 누구나 이용 가능
+    permission_classes = [IsAuthenticatedOrReadOnly]  # 관리자만 가능 or 누구나 이용 가능
 
     # 주류 목록 조회
     def get(self, request):
@@ -50,9 +48,7 @@ class LiquorBookmarkView(APIView):
 
 # 주류 디테일 페이지 조회(GET/누구나 이용 가능) 및 수정(PUT/관리자만), 삭제(DELETE/관리자만)
 class LiquorDetailView(APIView):
-    permission_classes = [
-        IsAuthenticatedOrReadOnly
-    ]  # 관리자만 가능 or 누구나 이용 가능
+    permission_classes = [IsAuthenticatedOrReadOnly]  # 관리자만 가능 or 누구나 이용 가능
 
     # 주류 디테일 페이지 조회
     def get(self, request, pk):
@@ -66,9 +62,7 @@ class LiquorDetailView(APIView):
         # self.check_object_permissions(request)  # 관리자가 맞는지 체크
         liquor = get_object_or_404(Liquor, pk=pk)
 
-        serializer = LiquorDetailSerializer(
-            liquor, data=request.data, partial=True
-        )  # partial은 부분 수정
+        serializer = LiquorDetailSerializer(liquor, data=request.data, partial=True)  # partial은 부분 수정
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
