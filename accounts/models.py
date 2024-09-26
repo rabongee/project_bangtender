@@ -8,27 +8,26 @@ from liquor.models import Liquor
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password, name, email, address):
         # 외부 라이브러리를 사용하여 비밀번호를 해시화
-        hashed_password = bcrypt.hashpw(
-            password.encode('utf-8'), bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         user = self.model(
             username=username,
             # 바이트 문자열로 데이터베이스에 저장시 문제가 생길수 있어서 유니코드 문자열로 변환
-            password=hashed_password.decode('utf-8'),
+            password=hashed_password.decode("utf-8"),
             name=name,
             # 이메일의 도메인을 대문자로 받아도 소문자로 데이터베이스에 저장
             email=self.normalize_email(email),
-            address=address
+            address=address,
         )
         user.save()
         return user
 
-    def create_superuser(self, username, email, name, password, address=''):
+    def create_superuser(self, username, email, name, password, address=""):
         user = self.create_user(
             username=username,
             password=password,
             name=name,
             email=email,
-            address=address
+            address=address,
         )
         user.is_superuser = True
         user.save()
@@ -44,9 +43,9 @@ class User(AbstractBaseUser):
     address = models.CharField(max_length=254)
 
     # 고유 식별자로 사용되는 user모델의 필드 이름
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = "username"
     # 필수로 입력받고 싶은 값으로 createsuperuser시 사용
-    REQUIRED_FIELDS = ['name', 'email']
+    REQUIRED_FIELDS = ["name", "email"]
 
     objects = CustomUserManager()
 
@@ -56,11 +55,14 @@ class User(AbstractBaseUser):
 
 
 class My_Liquor(models.Model):
-    status_choices = [("1", "내가 보유한 술"),
-                      ("2", "좋아하는 술"), ("3", "싫어하는 술")]
+    status_choices = [
+        ("1", "내가 보유한 술"),
+        ("2", "좋아하는 술"),
+        ("3", "싫어하는 술"),
+    ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     liquor = models.ForeignKey(
-        Liquor, on_delete=models.CASCADE, related_name='my_liquor')
+        Liquor, on_delete=models.CASCADE, related_name="my_liquor"
+    )
     status = models.CharField(max_length=1, choices=status_choices)
