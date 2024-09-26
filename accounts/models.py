@@ -61,7 +61,7 @@ class My_Liquor(models.Model):
         ("3", "싫어하는 술"),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_user")
     liquor = models.ForeignKey(
         Liquor, on_delete=models.CASCADE, related_name="my_liquor"
     )
