@@ -1,4 +1,5 @@
 import bcrypt
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -64,3 +65,15 @@ class LogoutView(APIView):
 
         refresh_token.blacklist()
         return Response({"message": "성공적으로 로그아웃 되었습니다."})
+
+
+class UserAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+        if user == request.user:
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        else:
+            return Response({"message": "로그인한 유저와 다릅니다."}, status=status.HTTP_401_UNAUTHORIZED)

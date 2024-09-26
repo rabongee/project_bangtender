@@ -28,7 +28,7 @@ class LiquorListView(APIView):
     def post(self, request):
         self.permission_classes = [IsAdminUser]  # 관리자만 등록 가능
         self.check_object_permissions(request)  # 관리자가 맞는지 체크
-        serializer = LiquorListSerializer(data=request.data)
+        serializer = LiquorDetailSerializer(data=request.data)
         if serializer.is_vaild():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

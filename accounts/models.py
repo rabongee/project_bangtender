@@ -54,14 +54,14 @@ class User(AbstractBaseUser):
         self.save()
 
 
-class My_Liquor(models.Model):
+class MyLiquor(models.Model):
     status_choices = [
         ("1", "내가 보유한 술"),
         ("2", "좋아하는 술"),
         ("3", "싫어하는 술"),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_user")
     liquor = models.ForeignKey(
         Liquor, on_delete=models.CASCADE, related_name="my_liquor"
     )
