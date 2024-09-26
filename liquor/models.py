@@ -10,9 +10,7 @@ class Liquor(models.Model):
     taste = models.CharField(max_length=100)
     abv = models.FloatField()
     price = models.PositiveIntegerField()  # 양의 정수만 가능
-    bookmark = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="liquor_bookmark"
-    )
+    bookmark = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="liquor_bookmark")
 
     def __str__(self):
         return self.name
