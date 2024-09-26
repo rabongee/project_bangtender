@@ -25,9 +25,8 @@ def validator_signup(signup_data):
         except ValidationError:
             err_msg.append({"password": "비밀번호가 형식에 맞지 않습니다."})
 
-
     if (name := signup_data.get("name")):
-        if len(name)>20:
+        if len(name) > 20:
             err_msg.append({"name": "이름은 20자 이하여야 합니다."})
     else:
         err_msg.append({"name": "이름을 입력하지 않았습니다."})
@@ -45,5 +44,33 @@ def validator_signup(signup_data):
 
     if not (address := signup_data.get("address")):
         err_msg.append({"address": "주소를 입력하지 않았습니다."})
+
+    return not bool(err_msg), err_msg
+
+
+def validator_update_user(update_data, user_data):
+    err_msg = []
+
+    name = update_data.get("name", user_data.name)
+    if name =="":
+        err_msg.append({"name": "이름을 입력해야 합니다."})
+    elif len(name) > 20:
+        err_msg.append({"name": "이름은 20자 이하여야 합니다."})
+
+    email = update_data.get("email", user_data.email)  
+    if email == "": 
+        err_msg.append({"email": "이메일을 입력해야 합니다."})
+    elif User.objects.filter(email=email).exclude(pk=user_data.pk).exists(): 
+        err_msg.append({"email": "이미 존재하는 이메일입니다."})
+    else: 
+        try: 
+            validate_email(email)
+        except: 
+         err_msg.append({"email": "이메일 형식이 올바르지 않습니다."})
+
+
+    address = update_data.get("address", user_data.address)
+    if address == "":
+        err_msg.append({"address": "주소를 입력해야 합니다."})
 
     return not bool(err_msg), err_msg

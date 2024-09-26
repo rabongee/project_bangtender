@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .models import User
-from .validators import validator_signup
+from .validators import validator_signup, validator_update_user
 from .serializers import UserSerializer
 
 
@@ -70,10 +70,27 @@ class LogoutView(APIView):
 class UserAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_user_object(self, username):
+        return get_object_or_404(User, username=username)
+
     def get(self, request, username):
-        user = get_object_or_404(User, username=username)
+        user = self.get_user_object(username)
         if user == request.user:
             serializer = UserSerializer(user)
             return Response(serializer.data)
         else:
-            return Response({"message": "로그인한 유저와 다릅니다."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message": "로그인한 유저와 다릅니다."}, status=status.HTTP_403_FORBIDDEN)
+
+    def put(self, request, username):
+        user = self.get_user_object(username)
+        if user == request.user:
+            is_valid, error_message = validator_update_user(request.data, user)
+            if not is_valid:
+                return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            return Response(serializer.data)
+
+        else:
+            return Response({"message": "수정 권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
