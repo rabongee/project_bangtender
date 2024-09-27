@@ -5,6 +5,8 @@ from config import openai_api_key
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from accounts.models import User, My_Liquor
 from liquor.models import Liquor
 from cocktail.models import Cocktail
@@ -37,9 +39,9 @@ class MyFineTuning(APIView):
                 "messages": [
                     {"role": "system",
                         "content": f"당신은 데이터 {liquor_data}안에서 사용자의 가진 술로 만들 수 있는 칵테일을 알려주는 어시스턴트입니다."},
-                    {"role": "user", "content": "싱글몰트 위스키로 만들 수 있는 칵테일은 무엇인가요?"},
+                    {"role": "user", "content": "위스키로 만들 수 있는 칵테일은 무엇인가요?"},
                     {"role": "assistant",
-                        "content": "올드 패션드를 만들 수 있습니다. 싱글몰트 위스키, 설탕, 비터스를 사용합니다."}
+                        "content": "하이볼을 만들 수 있습니다. 무슨 위스키를 쓰느냐에 따라 다르지만, 좋아하는 위스키와 탄산수의 청량한 맛으로 먹는 칵테일입니다."}
                 ]
             },
             {
@@ -202,19 +204,20 @@ class MyFineTuning(APIView):
         print(f"파인튜닝 작업 ID: {fine_tune_job_id}")
 
         # 파인튜닝 작업 상태 확인
-        status = ''
-        while status != 'succeeded':
+        progress = ''
+        while progress != 'succeeded':
             fine_tune_job = client.fine_tuning.jobs.retrieve(fine_tune_job_id)
-            status = fine_tune_job.status
-            print(f"파인튜닝 상태: {status}")
-            if status == 'succeeded':
+            progress = fine_tune_job.status
+            print(f"파인튜닝 상태: {progress}")
+            if progress == 'succeeded':
                 print("파인튜닝이 완료되었습니다.")
                 break
-            elif status == 'failed':
+            elif progress == 'failed':
                 print("파인튜닝에 실패했습니다.")
                 print(f"오류 내용: {fine_tune_job}")
                 break
             time.sleep(30)
+        return Response({f"message: {progress}"}, status=status.HTTP_201_CREATED)
 
 
 class BangtenderBot(APIView):
