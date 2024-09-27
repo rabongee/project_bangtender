@@ -54,7 +54,7 @@ class User(AbstractBaseUser):
         self.save()
 
 
-class My_Liquor(models.Model):
+class MyLiquor(models.Model):
     status_choices = [
         ("1", "내가 보유한 술"),
         ("2", "좋아하는 술"),
