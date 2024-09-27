@@ -37,11 +37,11 @@ def bookmark_cocktail(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     user = request.user
-    if user in cocktail.bookmarked_by.all():
-        cocktail.bookmarked_by.remove(user)
+    if user in cocktail.bookmark.all():
+        cocktail.bookmark.remove(user)
         bookmarked = False
     else:
-        cocktail.bookmarked_by.add(user)
+        cocktail.bookmark.add(user)
         bookmarked = True
 
     return Response({'bookmarked': bookmarked})
