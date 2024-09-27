@@ -24,7 +24,6 @@ class LiquorListView(APIView):
         # 관리자인지 확인하는 코드 추가
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
-
         serializer = LiquorDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -82,5 +81,3 @@ class LiquorDetailView(APIView):
 
         liquor.delete()
         return Response({"message": "게시글 삭제 완료"}, status=status.HTTP_403_FORBIDDEN)
-
-
