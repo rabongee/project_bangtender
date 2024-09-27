@@ -3,15 +3,20 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .models import User
-from .validators import validator_signup, validator_update_user
+from .validators import validator_signup, validator_update_user, validator_change_password
 from .serializers import UserSerializer
 
 
 class AccountView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
     def post(self, request):
         is_valid, error_message = validator_signup(request.data)
         if not is_valid:
@@ -77,6 +82,27 @@ class LogoutView(APIView):
 
         refresh_token.blacklist()
         return Response({"message": "성공적으로 로그아웃 되었습니다."})
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, username):
+        user = get_object_or_404(User, username=username)
+        if user == request.user:
+            is_valid, error_message = validator_change_password(
+                request.data, user)
+            if not is_valid:
+                return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+
+            new_password = request.data.get('new_password')
+            hashed_password = bcrypt.hashpw(
+                new_password.encode("utf-8"), bcrypt.gensalt())
+            user.password = hashed_password.decode("utf-8")
+            user.save()
+            return Response({"message": "패스워드 변경에 성공했습니다."})
+        else:
+            return Response({"message": "수정 권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
 
 class UserAPIView(APIView):
