@@ -9,7 +9,7 @@ class Cocktail(models.Model):
     content = models.TextField()
     ingredients = models.TextField()
     taste = models.CharField(max_length=100)
-    abv = models.FloatField()
+    abv = models.FloatField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     bookmarked_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='bookmarked_cocktails', blank=True)
