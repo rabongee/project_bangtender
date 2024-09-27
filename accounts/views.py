@@ -7,8 +7,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .models import User
-from .validators import validator_signup, validator_update_user, validator_change_password
+from .validators import (
+    validator_signup, validator_update_user, validator_change_password)
 from .serializers import UserSerializer
+from liquor.models import Liquor
+from liquor.serializers import LiquorListSerializer
+from cocktail.models import Cocktail
+from cocktail.serializers import CocktailListSerializer
 
 
 class AccountView(APIView):
@@ -132,3 +137,23 @@ class UserAPIView(APIView):
 
         else:
             return Response({"message": "수정 권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+
+
+class MyBookmarkListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+        if user == request.user:
+            res_data = {}
+            liquor = Liquor.objects.filter(bookmark__username=username)
+            serializer = LiquorListSerializer(liquor, many=True)
+            res_data['liquor'] = serializer.data
+            cocktail = Cocktail.objects.filter(
+                bookmarked_by__username=username)
+            serializer = CocktailListSerializer(cocktail, many=True)
+            res_data['cocktail'] = serializer.data
+            return Response(res_data)
+        else:
+            return Response({"message": "다른 사람의 북마크는 볼 수 없습니다."},
+                            status=status.HTTP_403_FORBIDDEN)
