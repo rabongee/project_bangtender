@@ -12,12 +12,13 @@ class CocktailListCreateView(generics.ListCreateAPIView):
     serializer_class = CocktailListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def perform_create(self, serializer):
-        required_fields = ['name', 'image', 'content']
-        for field in required_fields:
-            if not self.request.data.get(field):
-                raise ValidationError(f'{field} 필드는 필수입니다.')
-        serializer.save()
+    def create(self, request):
+        serializer = CocktailDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({"error":"데이터 누락입니다."},status=status.HTTP_400_BAD_REQUEST)
 
 # 칵테일 상세 조회, 수정 및 삭제
 class CocktailDetailView(generics.RetrieveUpdateDestroyAPIView):
