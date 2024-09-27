@@ -31,6 +31,15 @@ class AccountView(APIView):
         res_data['access_token'] = str(refresh.access_token)
         return Response(res_data, status=status.HTTP_201_CREATED)
 
+    def delete(self, request):
+        password = request.data.get('password')
+        user = request.user
+        if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            return Response({"error": "비밀번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.soft_delete()
+        return Response({"message": "회원탈퇴에 성공했습니다."})
+
 
 class LoginView(APIView):
     def post(self, request):
@@ -41,6 +50,9 @@ class LoginView(APIView):
             user = User.objects.get(username=username)
         except:
             return Response({"error": "아이디가 틀렸습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.is_active:
+            return Response({"error": "회원 정보가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             serializer = UserSerializer(user)
