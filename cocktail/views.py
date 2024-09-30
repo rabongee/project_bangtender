@@ -7,6 +7,8 @@ from .serializers import CocktailListSerializer, CocktailDetailSerializer
 from rest_framework.exceptions import ValidationError
 
 # 칵테일 목록 조회 및 추가
+
+
 class CocktailListCreateView(generics.ListCreateAPIView):
     queryset = Cocktail.objects.all()
     serializer_class = CocktailListSerializer
@@ -18,9 +20,11 @@ class CocktailListCreateView(generics.ListCreateAPIView):
             serializer.save()
             return Response(serializer.data)
         else:
-            return Response({"error":"데이터 누락입니다."},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "데이터 누락입니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 # 칵테일 상세 조회, 수정 및 삭제
+
+
 class CocktailDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Cocktail.objects.all()
     serializer_class = CocktailDetailSerializer
@@ -37,11 +41,11 @@ def bookmark_cocktail(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     user = request.user
-    if user in cocktail.bookmarked_by.all():
-        cocktail.bookmarked_by.remove(user)
-        bookmarked = False
+    if user in cocktail.bookmark.all():
+        cocktail.bookmark.remove(user)
+        bookmarked = "북마크 취소"
     else:
-        cocktail.bookmarked_by.add(user)
-        bookmarked = True
+        cocktail.bookmark.add(user)
+        bookmarked = "북마크 완료"
 
-    return Response({'bookmarked': bookmarked})
+    return Response({'message': bookmarked})
