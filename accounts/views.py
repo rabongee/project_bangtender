@@ -150,7 +150,7 @@ class MyBookmarkListView(APIView):
             serializer = LiquorListSerializer(liquor, many=True)
             res_data['liquor'] = serializer.data
             cocktail = Cocktail.objects.filter(
-                bookmarked_by__username=username)
+                bookmark__username=username)
             serializer = CocktailListSerializer(cocktail, many=True)
             res_data['cocktail'] = serializer.data
             return Response(res_data)
