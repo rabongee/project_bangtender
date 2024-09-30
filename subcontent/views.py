@@ -36,8 +36,6 @@ class MyFineTuning(APIView):
                 except json.JSONDecodeError as e:
                     print(f"{i+1}번째 줄에서 JSONDecodeError 발생: {e}")
 
-        # return Response({"message": "여까지 문제없음~"}, status=status.HTTP_200_OK)
-
         # 생성 파일 OpenAI 업로드
         training_response = client.files.create(
             file=open('web_database.jsonl', 'rb'),
@@ -74,6 +72,8 @@ class MyFineTuning(APIView):
         print(f"파인튜닝된 모델 이름: {fine_tuned_model}")
         return Response({f"message: {progress}"}, status=status.HTTP_201_CREATED)
 
+    # chatgpt가 문제임 내 문제 아님
+
     def delete(self, request):
 
         if not request.user.is_superuser:
@@ -82,7 +82,7 @@ class MyFineTuning(APIView):
         client = OpenAI(api_key=openai_api_key)
         # 삭제할 파인튜닝 모델 이름
         # openai.Model.delete(request.data)
-        client.models.delete("ft:gpt-3.5-turbo-1106:personal::AD2KL20o")
+        client.models.delete("ft:gpt-3.5-turbo-1106:personal::AD31BXWl")
         return Response({"message": "삭제 성공"}, status=status.HTTP_204_NO_CONTENT)
 
 
