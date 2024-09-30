@@ -1,20 +1,18 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.conf import settings
-# Create your models here.
+from bangtender.base_models import CommonFields
 
 
-class Cocktail(models.Model):
+
+class Cocktail(CommonFields):
     name = models.CharField(max_length=200)
-    img = models.ImageField(upload_to='cocktails/')
+    image = models.ImageField(upload_to='cocktails/')
     content = models.TextField()
     ingredients = models.TextField()
     taste = models.CharField(max_length=500)
-    abv = models.FloatField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    abv = models.DecimalField(max_digits=3, decimal_places=1)
     bookmark = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name='cocktail_bookmark')
+        settings.AUTH_USER_MODEL, related_name='cocktail_bookmark', blank=True)
 
     def __str__(self):
         return self.name
