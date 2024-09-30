@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.conf import settings
 from bangtender.base_models import CommonFields
 
@@ -10,7 +9,7 @@ class Cocktail(CommonFields):
     content = models.TextField()
     ingredients = models.TextField()
     taste = models.CharField(max_length=100)
-    abv = models.FloatField()
+    abv = models.DecimalField(max_digits=3, decimal_places=1)
     bookmark = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name='cocktail_bookmark', blank=True)
 
