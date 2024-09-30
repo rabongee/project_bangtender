@@ -3,12 +3,14 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from liquor.models import Liquor
+from bangtender.base_models import CommonFields
 
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password, name, email, address):
         # 외부 라이브러리를 사용하여 비밀번호를 해시화
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(
+            password.encode("utf-8"), bcrypt.gensalt())
         user = self.model(
             username=username,
             # 바이트 문자열로 데이터베이스에 저장시 문제가 생길수 있어서 유니코드 문자열로 변환
@@ -41,6 +43,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     email = models.EmailField(max_length=254, unique=True)
     address = models.CharField(max_length=254)
+    date_joined = models.DateTimeField(auto_now_add=True)
 
     # 고유 식별자로 사용되는 user모델의 필드 이름
     USERNAME_FIELD = "username"
@@ -49,19 +52,23 @@ class User(AbstractBaseUser):
 
     objects = CustomUserManager()
 
+    def __str__(self):
+        return self.username
+
     def soft_delete(self):
         self.is_active = False
         self.save()
 
 
-class MyLiquor(models.Model):
+class MyLiquor(CommonFields):
     status_choices = [
         ("1", "내가 보유한 술"),
         ("2", "좋아하는 술"),
         ("3", "싫어하는 술"),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_user")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE, related_name="my_user")
     liquor = models.ForeignKey(
         Liquor, on_delete=models.CASCADE, related_name="my_liquor"
     )
