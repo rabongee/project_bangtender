@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'liquor',
     'cocktail',
     'subcontent',
+    'import_export',
 ]
 
 MIDDLEWARE = [

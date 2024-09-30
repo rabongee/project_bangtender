@@ -1,3 +1,11 @@
+# app/admin.py
 from django.contrib import admin
+from .models import Cocktail
+from import_export.admin import ImportExportModelAdmin
 
-# Register your models here.
+
+class CocktailAdmin(ImportExportModelAdmin):
+    pass
+
+
+admin.site.register(Cocktail, CocktailAdmin)
