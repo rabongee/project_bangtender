@@ -33,20 +33,25 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # middleware
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # lib
     'django_extensions',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'import_export',
+
+    # app
     'accounts',
     'liquor',
     'cocktail',
     'subcontents',
-    'import_export',
 ]
 
 MIDDLEWARE = [
