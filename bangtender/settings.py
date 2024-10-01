@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'accounts',
     'liquor',
     'cocktail',
-    'subcontent',
+    'subcontents',
     'import_export',
 ]
 

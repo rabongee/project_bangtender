@@ -24,5 +24,5 @@ urlpatterns = [
     path('api/v1/accounts/', include('accounts.urls')),
     path('api/v1/liquor/', include('liquor.urls')),
     path('api/v1/cocktail/', include('cocktail.urls')),
-    path('api/v1/subcontent/', include('subcontent.urls')),
+    path('api/v1/subcontents/', include('subcontents.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
