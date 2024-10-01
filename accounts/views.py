@@ -25,7 +25,7 @@ class AccountView(APIView):
     def post(self, request):
         is_valid, error_message = validator_signup(request.data)
         if not is_valid:
-            return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create_user(
             username=request.data.get("username"),
@@ -45,7 +45,7 @@ class AccountView(APIView):
         password = request.data.get('password')
         user = request.user
         if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-            return Response({"error": "비밀번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "비밀번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         user.soft_delete()
         return Response({"message": "회원탈퇴에 성공했습니다."})
@@ -59,10 +59,10 @@ class LoginView(APIView):
         try:
             user = User.objects.get(username=username)
         except:
-            return Response({"error": "아이디가 틀렸습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "아이디가 틀렸습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user.is_active:
-            return Response({"error": "회원 정보가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "회원 정보가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             serializer = UserSerializer(user)
@@ -72,7 +72,7 @@ class LoginView(APIView):
             res_data['access_token'] = str(refresh.access_token)
             return Response(res_data)
         else:
-            return Response({"error": "비밀번호가 틀렸습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "비밀번호가 틀렸습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutView(APIView):
@@ -83,7 +83,7 @@ class LogoutView(APIView):
         try:
             refresh_token = RefreshToken(refresh_token_str)
         except TokenError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         refresh_token.blacklist()
         return Response({"message": "성공적으로 로그아웃 되었습니다."})
@@ -98,7 +98,7 @@ class ChangePasswordView(APIView):
             is_valid, error_message = validator_change_password(
                 request.data, user)
             if not is_valid:
-                return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
             new_password = request.data.get('new_password')
             hashed_password = bcrypt.hashpw(
@@ -129,7 +129,7 @@ class UserAPIView(APIView):
         if user == request.user:
             is_valid, error_message = validator_update_user(request.data, user)
             if not is_valid:
-                return Response({"error": error_message}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
             serializer = UserSerializer(user, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()

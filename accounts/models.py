@@ -1,7 +1,7 @@
 import bcrypt
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from liquor.models import Liquor
 from bangtender.base_models import CommonFields
 
@@ -32,14 +32,16 @@ class CustomUserManager(BaseUserManager):
             address=address,
         )
         user.is_superuser = True
+        user.is_staff = True
         user.save()
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=20)
     is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     email = models.EmailField(max_length=254, unique=True)
     address = models.CharField(max_length=254)
@@ -58,6 +60,10 @@ class User(AbstractBaseUser):
     def soft_delete(self):
         self.is_active = False
         self.save()
+
+    # 로그인 해싱 커스터마이징을 위한 check_password 오버라이딩
+    def check_password(self, raw_password):
+        return bcrypt.checkpw(raw_password.encode('utf-8'), self.password.encode('utf-8'))
 
 
 class MyLiquor(CommonFields):
