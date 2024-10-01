@@ -6,18 +6,20 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from .models import Liquor
 from .serializers import LiquorListSerializer, LiquorDetailSerializer
-
+from subcontents.views import RecordPagination
+from rest_framework.generics import ListCreateAPIView
 
 # 주류 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
-class LiquorListView(APIView):
+class LiquorListView(ListCreateAPIView):
     # 인증된 회원(회원or관리자)만 가능 or 누구나 이용 가능
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     # 주류 목록 조회
-    def get(self, request):
+    serializer_class = LiquorListSerializer
+    pagination_class = RecordPagination
+    def get_queryset(self):
         liquor = Liquor.objects.all()
-        serializer = LiquorListSerializer(liquor, many=True)
-        return Response(serializer.data)
+        return liquor
 
     # 게시글 등록
     def post(self, request):

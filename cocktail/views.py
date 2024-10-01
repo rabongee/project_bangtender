@@ -5,19 +5,20 @@ from .models import Cocktail
 from .serializers import CocktailListSerializer, CocktailDetailSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+from subcontents.views import RecordPagination
+from rest_framework.generics import ListAPIView
 
 
 # 칵테일 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
-class CocktailListView(APIView):
-    queryset = Cocktail.objects.all()
-    serializer_class = CocktailListSerializer
+class CocktailListView(ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     # 칵테일 목록 조회
-    def get(self, request):
-        liquor = Cocktail.objects.all()
-        serializer = CocktailListSerializer(liquor, many=True)
-        return Response(serializer.data)
+    serializer_class = CocktailListSerializer
+    pagination_class = RecordPagination
+    def get_queryset(self):
+        cocktail = Cocktail.objects.all()
+        return cocktail
 
     # 게시글 등록
     def post(self, request):
