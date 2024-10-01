@@ -20,7 +20,7 @@ class CocktailListCreateView(generics.ListCreateAPIView):
             serializer.save()
             return Response(serializer.data)
         else:
-            return Response({"error": "데이터 누락입니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "데이터 누락입니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 # 칵테일 상세 조회, 수정 및 삭제
 

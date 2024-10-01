@@ -90,27 +90,22 @@ class BangtenderBot(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # # 유효성 검증
-        # is_valid, error_message = validate_talk(request.data)
-        # if not is_valid:
-        #     return Response(f"{error_message}", status=status.HTTP_400_BAD_REQUEST)
+        # 유효성 검증
+        if request.user.id is None:
+            return Response({"message": "user_id가 누락됐습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         message = request.data.get("message")  # 유저가 입력한 message
 
         # OpenAI와 소통했던 내역이 저장된 히스토리
         history = request.data.get("history")
 
-        # 함수에 넣기위한 초기화
-        liquor_data1 = []
-        liquor_data2 = []
-        liquor_data3 = []
         # 처음 질문을 받는 것이라면 system prompt에 사용자 정보를 넘겨줘야 하므로 데이터베이스 접근.
         if len(history) == 0:
             liquor_list = MyLiquor.objects.filter(
                 user_id=request.user.id).prefetch_related("my_liquor", "my_user")
-            liquor_data1 = list(liquor_list.filter(status="1"))  # 내가 가진 술
-            liquor_data2 = list(liquor_list.filter(status="2"))  # 내가 좋아하는 술
-            liquor_data3 = list(liquor_list.filter(status="3"))  # 내가 싫어하는 술
+            liquor_data1 = [i for i in liquor_list.filter(status="1")]  # 내가 가진 술
+            liquor_data2 = [i for i in liquor_list.filter(status="2")]  # 내가 좋아하는 술
+            liquor_data3 = [i for i in liquor_list.filter(status="3")]  # 내가 싫어하는 술
 
         # 딕셔너리 형태로 받았기에 json으로 변환해서 보내야함.
         new_history = btd_bot(message, message_history=history,
