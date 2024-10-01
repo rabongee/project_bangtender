@@ -47,6 +47,7 @@ class CocktailBookmarkView(APIView):
             return Response({"message": "북마크 완료"}, status=status.HTTP_201_CREATED)
 
 
+
 # 칵테일 디테일 페이지 조회(GET/누구나 이용 가능) 및 수정(PUT/관리자만), 삭제(DELETE/관리자만)
 class CocktailDetailView(APIView):
     # 인증된 회원(회원or관리자)만 가능 or 누구나 이용 가능
