@@ -10,7 +10,5 @@ urlpatterns = [
     path('<int:pk>/', views.CocktailDetailView.as_view(), name='cocktail_detail'),
 
     # 특정 칵테일 북마크 (POST)
-    # path('<int:pk>/bookmark/', bookmark_cocktail, name='bookmark_cocktail'),
-
     path("<int:pk>/bookmark/", views.CocktailBookmarkView.as_view(),name="cocktail_bookmark")
 ]

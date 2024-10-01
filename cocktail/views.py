@@ -8,10 +8,9 @@ from rest_framework.views import APIView
 
 
 # 칵테일 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
-class CocktailListCreateView(generics.ListCreateAPIView):
+class CocktailListView(APIView):
     queryset = Cocktail.objects.all()
     serializer_class = CocktailListSerializer
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     # 칵테일 목록 조회
@@ -76,11 +75,11 @@ class CocktailDetailView(APIView):
 
     # 게시글 삭제
     def delete(self, request, pk):
-        liquor = get_object_or_404(Cocktail, pk=pk)
+        cocktail = get_object_or_404(Cocktail, pk=pk)
         # 관리자 확인 코드
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
-        liquor.delete()
+        cocktail.delete()
         return Response({"message": "게시글 삭제 완료"}, status=status.HTTP_403_FORBIDDEN)
 
