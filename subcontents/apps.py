@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class SubcontentConfig(AppConfig):
+class SubcontentsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'subcontent'
+    name = 'subcontents'
