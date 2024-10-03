@@ -1,6 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+
+from cocktail.validators import validator_cocktail
 from .models import Cocktail
 from .serializers import CocktailListSerializer, CocktailDetailSerializer
 from django.shortcuts import get_object_or_404
@@ -25,6 +27,12 @@ class CocktailListView(ListAPIView):
         # 관리자 확인 코드
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
+        # 검증 로직
+        # 검증 로직
+        is_valid, error_message = validator_cocktail(request.data)
+        if not is_valid:
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = CocktailDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -67,6 +75,11 @@ class CocktailDetailView(APIView):
         # 관리자 확인 코드
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
+
+        # 검증 로직
+        is_valid, error_message = validator_cocktail(request.data, cocktail_instance=cocktail)
+        if not is_valid:
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CocktailDetailSerializer(
             cocktail, data=request.data, partial=True)  # partial은 부분 수정
