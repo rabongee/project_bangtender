@@ -1,7 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-
 from cocktail.validators import validator_cocktail
 from .models import Cocktail
 from .serializers import CocktailListSerializer, CocktailDetailSerializer
@@ -27,7 +26,7 @@ class CocktailListView(ListAPIView):
         # 관리자 확인 코드
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
-        # 검증 로직
+
         # 검증 로직
         is_valid, error_message = validator_cocktail(request.data)
         if not is_valid:

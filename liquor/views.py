@@ -8,6 +8,7 @@ from .models import Liquor
 from .serializers import LiquorListSerializer, LiquorDetailSerializer
 from subcontents.views import RecordPagination
 from rest_framework.generics import ListCreateAPIView
+from liquor.validators import validator_liquor
 
 # 주류 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
 class LiquorListView(ListCreateAPIView):
@@ -26,6 +27,12 @@ class LiquorListView(ListCreateAPIView):
         # 관리자인지 확인하는 코드 추가
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
+        
+        # 검증 로직
+        is_valid, error_message = validator_liquor(request.data)
+        if not is_valid:
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = LiquorDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -66,6 +73,11 @@ class LiquorDetailView(APIView):
         # 관리자인지 확인하는 코드 추가
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
+
+        # 검증 로직
+        is_valid, error_message = validator_liquor(request.data, liquor_instance=liquor)
+        if not is_valid:
+            return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = LiquorDetailSerializer(
             liquor, data=request.data, partial=True)  # partial은 부분 수정
