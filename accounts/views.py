@@ -92,8 +92,8 @@ class LogoutView(APIView):
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, username):
-        user = get_object_or_404(User, username=username)
+    def put(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
         if user == request.user:
             is_valid, error_message = validator_change_password(
                 request.data, user)
@@ -113,19 +113,19 @@ class ChangePasswordView(APIView):
 class UserAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_user_object(self, username):
-        return get_object_or_404(User, username=username)
+    def get_user_object(self, pk):
+        return get_object_or_404(User, pk=pk)
 
-    def get(self, request, username):
-        user = self.get_user_object(username)
+    def get(self, request, pk):
+        user = self.get_user_object(pk)
         if user == request.user:
             serializer = UserSerializer(user)
             return Response(serializer.data)
         else:
             return Response({"message": "로그인한 유저와 다릅니다."}, status=status.HTTP_403_FORBIDDEN)
 
-    def put(self, request, username):
-        user = self.get_user_object(username)
+    def put(self, request, pk):
+        user = self.get_user_object(pk)
         if user == request.user:
             is_valid, error_message = validator_update_user(request.data, user)
             if not is_valid:
@@ -142,15 +142,15 @@ class UserAPIView(APIView):
 class MyBookmarkListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, username):
-        user = get_object_or_404(User, username=username)
+    def get(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
         if user == request.user:
             res_data = {}
-            liquor = Liquor.objects.filter(bookmark__username=username)
+            liquor = Liquor.objects.filter(bookmark__id=pk)
             serializer = LiquorListSerializer(liquor, many=True)
             res_data['liquor'] = serializer.data
             cocktail = Cocktail.objects.filter(
-                bookmark__username=username)
+                bookmark__id=pk)
             serializer = CocktailListSerializer(cocktail, many=True)
             res_data['cocktail'] = serializer.data
             return Response(res_data)

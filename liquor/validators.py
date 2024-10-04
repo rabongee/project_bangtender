@@ -19,7 +19,7 @@ def validator_liquor(data, liquor_instance=None):
     except InvalidOperation:
         return False, "abv(알코올 도수)는 숫자여야 합니다."
 
-    if not (0 <= abv <= 100):
+    if not (0 <= abv < 100):
         return False, "abv(알코올 도수)는 0에서 100 사이의 값이어야 합니다."
 
     # 가격(price) 검증 로직
@@ -37,10 +37,10 @@ def validator_liquor(data, liquor_instance=None):
         if liquor_instance:
             # 수정하는 경우, 현재 주류를 제외하고 중복 확인
             if Liquor.objects.exclude(id=liquor_instance.id).filter(name=name).exists():
-                return False, "이미 존재하는 리큐르 이름입니다."
+                return False, "이미 존재하는 주류 이름입니다."
         else:
             # 새로 추가하는 경우 중복 확인
             if Liquor.objects.filter(name=name).exists():
-                return False, "이미 존재하는 리큐르 이름입니다."
+                return False, "이미 존재하는 주류 이름입니다."
 
     return True, None

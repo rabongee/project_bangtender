@@ -19,7 +19,7 @@ def validator_cocktail(data, cocktail_instance=None):
     except InvalidOperation:
         return False, "abv(알코올 도수)는 숫자여야 합니다."
 
-    if not (0 <= abv <= 100):
+    if not (0 <= abv < 100):
         return False, "abv(알코올 도수)는 0에서 100 사이의 값이어야 합니다."
 
     # 이름 중복 방지 (수정 시 해당 객체 제외)
