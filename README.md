@@ -173,9 +173,7 @@ python manage.py runserver
 ## 🖼️ ERD (Entity Relationship Diagram)
 
 ### ERD 이미지
-
-![image (4)](추가해야함)
-
+![스크린샷 2024-10-04 211454](https://github.com/user-attachments/assets/a2d018e0-ecb0-4e46-b9a5-fc488a5cffe8)
 ### ERD 설명
 
 - **User 모델**: 각 사용자 계정 정보 및 역할 관리. 소프트 삭제(soft_delete) 기능으로 사용자 탈퇴 시 계정 비활성화.
