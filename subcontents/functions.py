@@ -4,9 +4,6 @@ from config import openai_api_key
 from liquor.models import Liquor
 from cocktail.models import Cocktail
 
-
-# NOTE: 프롬프트 질문이 유사한 구성을 가지므로 loop문을 통해 DB에서 받아오는 형식으로 바꾸길 권장 !!!!!
-
 def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquor=[], like_liquor=[], hate_liquor=[]):
     query_liquor = Liquor.objects.values('name', 'classification')
     # 양주 카테고리
