@@ -113,8 +113,7 @@ python manage.py runserver
 ---
 
 ## 🖇️ 와이어 프레임
-
-![Wire_frame](https://www.figma.com/board/Eoz1dUzj3KJwVM6nhzMtPQ/%EC%99%80%EC%9D%B4%EC%96%B4%ED%94%84%EB%A0%88%EC%9E%84?node-id=0-1&node-type=canvas&t=8WrjCfcLsswqH73e-0)
+![image (2)](https://github.com/user-attachments/assets/8208f8a4-f69e-4394-845e-edece3fd36fb)
 
 ---
 
