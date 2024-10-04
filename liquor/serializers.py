@@ -6,11 +6,12 @@ class LiquorListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Liquor
         fields = [
+            "id",
             "name",
             "price",
             "img",
         ]
-
+# postman에서 조회하기 어려워 id 임시 추가!!!
 
 class LiquorDetailSerializer(serializers.ModelSerializer):
     class Meta:
