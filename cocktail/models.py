@@ -3,10 +3,9 @@ from django.conf import settings
 from bangtender.base_models import CommonFields
 
 
-
 class Cocktail(CommonFields):
     name = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='cocktails/')
+    img = models.ImageField(upload_to='cocktails/')
     content = models.TextField()
     ingredients = models.TextField()
     taste = models.CharField(max_length=500)
