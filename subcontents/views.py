@@ -44,6 +44,9 @@ class MainPageAPIView(APIView):
 class SearchAPIView(APIView):
     def get(self,request):
         message = request.data.get("message")
+        # 검색어 입력 하지 않았을 때
+        if not message:
+            return Response({"message": "검색어를 입력하세요."}, status=status.HTTP_400_BAD_REQUEST)
         items = {}
         liquor_list = Liquor.objects.filter(Q(name__icontains=message) | Q(classification__icontains = message)).distinct()
         items['liquor_list'] = LiquorListSerializer(liquor_list, many=True).data

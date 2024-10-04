@@ -44,6 +44,8 @@ class CocktailBookmarkView(APIView):
     permission_classes = [IsAuthenticated]  # 회원만 가능
 
     def post(self, request, pk):
+        if not request.user.is_authenticated:
+            return Response({"detail": "회원만 이용 가능합니다."}, status=status.HTTP_401_UNAUTHORIZED)
         cocktail = get_object_or_404(Cocktail, pk=pk)
         user = request.user
 
