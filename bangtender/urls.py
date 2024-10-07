@@ -25,4 +25,9 @@ urlpatterns = [
     path('api/v1/liquor/', include('liquor.urls')),
     path('api/v1/cocktail/', include('cocktail.urls')),
     path('api/v1/subcontents/', include('subcontents.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+# 미디어 자료는 다른데로 연결해주는데 개발모드에서 일단 처리되는지 확인하기 위해 아래 코드 작성
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
