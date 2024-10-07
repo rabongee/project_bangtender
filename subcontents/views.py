@@ -109,14 +109,19 @@ class BangtenderBot(APIView):
         # 처음 질문을 받는 것이라면 system prompt에 사용자 정보를 넘겨줘야 하므로 데이터베이스 접근.
         if len(history) == 0:
             liquor_list = MyLiquor.objects.filter(
-                user_id=request.user.id).prefetch_related("my_liquor", "my_user")
-            # user_liquor = [i for i in liquor_list.filter(status="1")]  # 내가 가진 술
-            # like_liquor = [i for i in liquor_list.filter(status="2")]  # 내가 좋아하는 술
-            # hate_liquor = [i for i in liquor_list.filter(status="3")]  # 내가 싫어하는 술
-
+                user_id=request.user.id).prefetch_related("liquor", "user")
+            user_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="1")]  # 내가 가진 술
+            like_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="2")]  # 내가 좋아하는 술
+            hate_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="3")]  # 내가 싫어하는 술
+        print(user_liquor)
+        print(like_liquor)
+        print(hate_liquor)
         # 딕셔너리 형태로 받았기에 json으로 변환해서 보내야함.
         new_history = btd_bot(message, message_history=history,
-                              # user_liquor=user_liquor, like_liquor=like_liquor, hate_liquor=hate_liquor
+                              user_liquor=user_liquor, like_liquor=like_liquor, hate_liquor=hate_liquor
                               )
 
         return Response(new_history, status=status.HTTP_200_OK)
