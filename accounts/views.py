@@ -1,15 +1,16 @@
 import bcrypt
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from .models import User
+from .models import User, MyLiquor
 from .validators import (
     validator_signup, validator_update_user, validator_change_password)
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserLiquorSerializer
 from liquor.models import Liquor
 from liquor.serializers import LiquorListSerializer
 from cocktail.models import Cocktail
@@ -76,8 +77,6 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request):
         refresh_token_str = request.data.get("refresh_token")
         try:
@@ -119,24 +118,57 @@ class UserAPIView(APIView):
     def get(self, request, pk):
         user = self.get_user_object(pk)
         if user == request.user:
-            serializer = UserSerializer(user)
+            serializer = UserLiquorSerializer(user)
             return Response(serializer.data)
         else:
             return Response({"message": "로그인한 유저와 다릅니다."}, status=status.HTTP_403_FORBIDDEN)
 
+    # put 메소드 내의 작업을 하나의 트랜잭션으로 묶어서 하나의 단위로 처리됨
+    # 중간에 오류 발생시 전체 롤백
+    @transaction.atomic
     def put(self, request, pk):
         user = self.get_user_object(pk)
         if user == request.user:
             is_valid, error_message = validator_update_user(request.data, user)
             if not is_valid:
                 return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
-            serializer = UserSerializer(user, data=request.data, partial=True)
+
+            serializer = UserLiquorSerializer(
+                user, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-            return Response(serializer.data)
+                # 유저의 아이디를 가진 MyLiquor을 가져옴
+                my_liquors_data = request.data.get('my_liquors', {})
+                status_map = {'owned': '1', 'favorite': '2', 'disliked': '3'}
 
+                """
+                my_liquors_data에서 각 상태에 해당하는 술 목록을 순회하고
+                기존의 술 목록과 새로운 술 목록을 비교
+                """
+                for status_key, liquors in my_liquors_data.items():
+                    status_value = status_map.get(status_key)
+                    if status_value:
+                        existing_liquors = MyLiquor.objects.filter(
+                            user=user, status=status_value)
+                        existing_ids = set(
+                            existing_liquors.values_list('liquor_id', flat=True))
+                        new_ids = set(liquors)
+
+                        # 새로운 술 id가 기존 술 id에 없으면 추가
+                        ids_to_add = new_ids - existing_ids
+                        for liquor_id in ids_to_add:
+                            MyLiquor.objects.create(
+                                user=user, liquor_id=liquor_id, status=status_value)
+
+                        # 기존 술 id중 새로운 술 id에 포함되지 않으면 데이터베이스에서 삭제
+                        ids_to_remove = existing_ids - new_ids
+                        MyLiquor.objects.filter(
+                            user=user, liquor_id__in=ids_to_remove, status=status_value).delete()
+
+                return Response(UserLiquorSerializer(user).data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"message": "수정 권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": "수정 권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class MyBookmarkListView(APIView):
