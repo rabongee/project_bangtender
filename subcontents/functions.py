@@ -27,10 +27,10 @@ def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquo
         사용자가 가진 술은 {user_liquor}여기에서
         사용자가 좋아하는 술은 {like_liquor}여기에서
         사용자가 싫어하는 술은 {hate_liquor}여기에서
-        참고해서 말해줘
+        참고해서 말하되, 출력에는 포함하지 말아줘
         이름과 카테고리는 내가 지정한 곳에서 넣어줘
         추천이유는 채택된 주류를 기준으로 말해줘
-        출력은 json 형식에 맞춰줘
+
         예시로
         "name": "잭 다니엘스 700ml",
         "category":"위스키",
@@ -39,7 +39,8 @@ def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquo
         "name": "까뮤 VSOP (700ml)",
         "category":"브랜디",
         "why": "가장 향이 짙은 브랜디로는 까뮤 VSOP가 있습니다. 까뮤 VSOP는 꼬냑에서 가장 깊은 꽃향기를 지닌 VSOP로, 높은 수준의 테르페놀(꽃향기의 밀도)을 함유하여 비교할 수 없는 아름다운 꽃 향기를 만들어내는 것이 특징입니다."
-        이렇게 json 형식에 맞춰서 출력해줘
+        이렇게 출력해줘
+        
         """
     if len(message_history) == 0:
         # 최초 질문
@@ -64,7 +65,8 @@ def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquo
     )
     # 사용자 질문에 대한 답변을 추가
     message_history.append(
-        {"role": "assistant", "content": completion.choices[0].message.content}
+        {"role": "assistant",
+            "content": completion.choices[0].message.content.strip()}
     )
 
     return message_history
