@@ -96,7 +96,7 @@ class RecordPagination(pagination.CursorPagination):
 class BangtenderBot(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def post(self, request):
         # 유효성 검증
         if request.user.id is None:
             return Response({"message": "user_id가 누락됐습니다."}, status=status.HTTP_400_BAD_REQUEST)
@@ -104,21 +104,25 @@ class BangtenderBot(APIView):
         message = request.data.get("message")  # 유저가 입력한 message
 
         # OpenAI와 소통했던 내역이 저장된 히스토리
-        history = request.data.get("history")
+        history = request.data.get("history", [])
 
         # 처음 질문을 받는 것이라면 system prompt에 사용자 정보를 넘겨줘야 하므로 데이터베이스 접근.
+        user_liquor = []
+        like_liquor = []
+        hate_liquor = []
         if len(history) == 0:
             liquor_list = MyLiquor.objects.filter(
-                user_id=request.user.id).prefetch_related("my_liquor", "my_user")
-            # user_liquor = [i for i in liquor_list.filter(status="1")]  # 내가 가진 술
-            # like_liquor = [i for i in liquor_list.filter(status="2")]  # 내가 좋아하는 술
-            # hate_liquor = [i for i in liquor_list.filter(status="3")]  # 내가 싫어하는 술
-
-        # 딕셔너리 형태로 받았기에 json으로 변환해서 보내야함.
+                user_id=request.user.id).prefetch_related("liquor", "user")
+            user_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="1")]  # 내가 가진 술
+            like_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="2")]  # 내가 좋아하는 술
+            hate_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="3")]  # 내가 싫어하는 술
         new_history = btd_bot(message, message_history=history,
-                              # user_liquor=user_liquor, like_liquor=like_liquor, hate_liquor=hate_liquor
+                              user_liquor=user_liquor, like_liquor=like_liquor, hate_liquor=hate_liquor
                               )
-
+        print(new_history[-1]['content'])
         return Response(new_history, status=status.HTTP_200_OK)
 
 
