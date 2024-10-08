@@ -6,6 +6,7 @@ urlpatterns = [
     path('search/', views.SearchAPIView.as_view(), name='search'),
     path('info/', views.InfoAPIView.as_view(), name='info'),
     path("bangtenderbot/", views.BangtenderBot.as_view()),
+    path('map/', views.UserAddressAPIView.as_view()),
 
 
     # NEWMODULE: 파인튜닝 모델

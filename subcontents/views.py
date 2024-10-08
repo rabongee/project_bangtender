@@ -93,6 +93,20 @@ class RecordPagination(pagination.CursorPagination):
         )
 
 
+class UserAddressAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        if user.address:
+            return Response({"address": user.address})
+        else:
+            return Response({
+                "message": "주소가 등록되어 있지 않습니다."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
 class BangtenderBot(APIView):
     permission_classes = [IsAuthenticated]
 
