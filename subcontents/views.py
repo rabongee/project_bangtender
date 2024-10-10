@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from .models import Info
 from .serializers import InfoSerializer
-from random import randint, sample
+from random import choice, sample
 from cocktail.models import Cocktail
 from cocktail.serializers import CocktailListSerializer
 from rest_framework.response import Response
@@ -32,22 +32,40 @@ class InfoAPIView(APIView):
 
 class MainPageAPIView(APIView):
     def get(self, request):
-        reponse_seri = {}
-        # info 전체 데이터 가져오기
-        info = Info.objects.all()
-        # info 전체 크기
-        max_num = len(info)
-        info = info[randint(0, max_num-1)]
+        response_seri = {}
+        # info 랜덤 데이터 가져오기
+        info = choice(Info.objects.all())
         serializers = InfoSerializer(info)
-        reponse_seri['info'] = serializers.data
-        cocktail = Cocktail.objects.all()
-        cocktail_list = cocktail.filter(
-            id__in=sample(range(1, len(cocktail)), 3))
-        serializers2 = CocktailListSerializer(cocktail_list, many=True)
-        reponse_seri['cocktail_list'] = serializers2.data
-        # 사용자 맞춤 추천 기능 구현 해야함!!!!!!
+        response_seri['info'] = serializers.data
 
-        return Response(reponse_seri, status=status.HTTP_200_OK)
+        # 랜덤 칵테일 데이터 3개 가져오기
+        cocktail_list = sample(list(Cocktail.objects.all()), 3)
+        serializers2 = CocktailListSerializer(cocktail_list, many=True)
+        response_seri['cocktail_list'] = serializers2.data
+
+        # 로그인 안되어 있다면
+        if not request.user.id:
+            return Response(response_seri, status=status.HTTP_200_OK)
+
+        # 사용자 맞춤 추천 데이터 가져오기
+        liquor_list = MyLiquor.objects.filter(
+            user_id=request.user.id).prefetch_related("liquor", "user")
+        # 가진 술 및 좋아하는 술 종류
+        like_classification = set(
+            [i.liquor.classification for i in liquor_list.filter(status__in=["1", "2"])])
+        # 싫어하는 술
+        hate_liquor = [i.liquor.name for i in liquor_list.filter(status="3")]
+        # 가진 술 및 좋아하는 술이 없다면
+        if not like_classification:
+            response_seri['user_liquor_list'] = '사용자 데이터가 등록되지 않았습니다.'
+            return Response(response_seri, status=status.HTTP_200_OK)
+
+        # 랜덤 사용자 맞춤 술 데이터 3개 가져오기
+        random_custom_liquor = sample(list(Liquor.objects.filter(
+            classification__in=like_classification).exclude(name__in=hate_liquor)), 3)
+        serializers3 = LiquorListSerializer(random_custom_liquor, many=True)
+        response_seri['user_liquor_list'] = serializers3.data
+        return Response(response_seri, status=status.HTTP_200_OK)
 
 # 검색 기능
 
