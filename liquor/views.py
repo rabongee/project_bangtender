@@ -20,6 +20,12 @@ class LiquorListView(ListCreateAPIView):
     pagination_class = RecordPagination
     def get_queryset(self):
         liquor = Liquor.objects.all()
+
+        # classification 필터링 추가
+        classification = self.request.query_params.get('classification')
+        if classification:
+            liquor = liquor.filter(classification=classification)
+        
         return liquor
 
     # 게시글 등록
