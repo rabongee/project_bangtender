@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "username", "name", "email", "address", "is_superuser"
+            "id", "username", "name", "email", "address"
         ]
 
 
@@ -21,7 +21,8 @@ class UserLiquorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'my_liquors']
+        fields = ['id', 'username', 'email', 'my_liquors',
+                  "name", "address", "is_superuser"]
 
     def get_my_liquors(self, obj):
         my_liquors = MyLiquor.objects.filter(user=obj)
