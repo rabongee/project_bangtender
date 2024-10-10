@@ -34,14 +34,11 @@ class MainPageAPIView(APIView):
     def get(self, request):
         response_seri = {}
         # info 랜덤 데이터 가져오기
-        info = choice(Info.objects.all())
-        serializers = InfoSerializer(info)
-        response_seri['info'] = serializers.data
+        response_seri['info'] = InfoSerializer(choice(Info.objects.all())).data
 
         # 랜덤 칵테일 데이터 3개 가져오기
-        cocktail_list = sample(list(Cocktail.objects.all()), 3)
-        serializers2 = CocktailListSerializer(cocktail_list, many=True)
-        response_seri['cocktail_list'] = serializers2.data
+        response_seri['cocktail_list'] = CocktailListSerializer(
+            sample(list(Cocktail.objects.all()), 3), many=True).data
 
         # 로그인 안되어 있다면
         if not request.user.id:
@@ -63,8 +60,8 @@ class MainPageAPIView(APIView):
         # 랜덤 사용자 맞춤 술 데이터 3개 가져오기
         random_custom_liquor = sample(list(Liquor.objects.filter(
             classification__in=like_classification).exclude(name__in=hate_liquor)), 3)
-        serializers3 = LiquorListSerializer(random_custom_liquor, many=True)
-        response_seri['user_liquor_list'] = serializers3.data
+        response_seri['user_liquor_list'] = LiquorListSerializer(
+            random_custom_liquor, many=True).data
         return Response(response_seri, status=status.HTTP_200_OK)
 
 # 검색 기능
