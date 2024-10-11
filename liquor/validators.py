@@ -1,8 +1,10 @@
 from decimal import Decimal, InvalidOperation
 from .models import Liquor
 
+
 def validator_liquor(data, liquor_instance=None):
-    required_fields = ["name", "classification", "img", "content", "taste", "abv", "price"]
+    required_fields = ["name", "classification",
+                       "img", "content", "taste", "abv", "price"]
 
     # 필수 필드 검증
     for field in required_fields:
