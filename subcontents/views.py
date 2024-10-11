@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from .models import Info
 from .serializers import InfoSerializer
-from random import randint, sample
+from random import choice, sample
 from cocktail.models import Cocktail
 from cocktail.serializers import CocktailListSerializer
 from rest_framework.response import Response
@@ -15,7 +15,7 @@ from rest_framework import pagination
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import MyLiquor
 from .functions import btd_bot
-
+from django.core.cache import cache
 # Create your views here.
 
 
@@ -32,22 +32,69 @@ class InfoAPIView(APIView):
 
 class MainPageAPIView(APIView):
     def get(self, request):
-        reponse_seri = {}
-        # info 전체 데이터 가져오기
-        info = Info.objects.all()
-        # info 전체 크기
-        max_num = len(info)
-        info = info[randint(0, max_num-1)]
-        serializers = InfoSerializer(info)
-        reponse_seri['info'] = serializers.data
-        cocktail = Cocktail.objects.all()
-        cocktail_list = cocktail.filter(
-            id__in=sample(range(1, len(cocktail)), 3))
-        serializers2 = CocktailListSerializer(cocktail_list, many=True)
-        reponse_seri['cocktail_list'] = serializers2.data
-        # 사용자 맞춤 추천 기능 구현 해야함!!!!!!
+        response_seri = {}
 
-        return Response(reponse_seri, status=status.HTTP_200_OK)
+        # info 랜덤 데이터 하루에 한번 가져오기
+        info_cache_key = 'random_info'
+        random_info = cache.get(info_cache_key)
+        if not random_info:
+            random_info = InfoSerializer(choice(Info.objects.all())).data
+            cache.set(info_cache_key, random_info,
+                      timeout=86400)  # 24시간 (하루) 캐시 저장
+        response_seri['info'] = random_info
+
+        # 랜덤 칵테일 데이터 3개 하루에 한번 가져오기
+        cocktail_cache_key = 'random_cocktail_list'
+        random_cocktail_list = cache.get(cocktail_cache_key)
+        if not random_cocktail_list:
+            random_cocktail_list = CocktailListSerializer(
+                sample(list(Cocktail.objects.all()), 3), many=True
+            ).data
+            cache.set(cocktail_cache_key, random_cocktail_list,
+                      timeout=86400)  # 24시간 (하루) 캐시 저장
+        response_seri['cocktail_list'] = random_cocktail_list
+
+        # 로그인 안되었으면
+        if not request.user.id:
+            return Response(response_seri, status=status.HTTP_200_OK)
+
+        # 사용자 맞춤 추천 데이터 가져오기
+        liquor_list = MyLiquor.objects.filter(
+            user_id=request.user.id
+        ).prefetch_related("liquor", "user")
+
+        # 가진 술 및 좋아하는 술 종류
+        like_classification = set(
+            [i.liquor.classification for i in liquor_list.filter(status__in=[
+                                                                 "1", "2"])]
+        )
+
+        # 싫어하는 술
+        hate_liquor = [i.liquor.name for i in liquor_list.filter(status="3")]
+
+        # 가진 술 및 좋아하는 술이 없으면
+        if not like_classification:
+            response_seri['user_liquor_list'] = '사용자 데이터가 등록되지 않았습니다.'
+            return Response(response_seri, status=status.HTTP_200_OK)
+
+        # 랜덤 사용자 맞춤 술 데이터 3개 가져오기, 하루에 한번
+        liquor_cache_key = f'random_custom_liquor_{request.user.id}'
+        random_custom_liquor = cache.get(liquor_cache_key)
+        if not random_custom_liquor:
+            random_custom_liquor = sample(
+                list(
+                    Liquor.objects.filter(
+                        classification__in=like_classification
+                    ).exclude(name__in=hate_liquor)
+                ),
+                3
+            )
+            cache.set(liquor_cache_key, random_custom_liquor,
+                      timeout=86400)  # 24시간 (하루) 캐시 저장
+        response_seri['user_liquor_list'] = LiquorListSerializer(
+            random_custom_liquor, many=True).data
+
+        return Response(response_seri, status=status.HTTP_200_OK)
 
 # 검색 기능
 
@@ -93,10 +140,24 @@ class RecordPagination(pagination.CursorPagination):
         )
 
 
-class BangtenderBot(APIView):
+class UserAddressAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
+
+        if user.address:
+            return Response({"address": user.address})
+        else:
+            return Response({
+                "message": "주소가 등록되어 있지 않습니다."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BangtenderBot(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
         # 유효성 검증
         if request.user.id is None:
             return Response({"message": "user_id가 누락됐습니다."}, status=status.HTTP_400_BAD_REQUEST)
@@ -104,21 +165,25 @@ class BangtenderBot(APIView):
         message = request.data.get("message")  # 유저가 입력한 message
 
         # OpenAI와 소통했던 내역이 저장된 히스토리
-        history = request.data.get("history")
+        history = request.data.get("history", [])
 
         # 처음 질문을 받는 것이라면 system prompt에 사용자 정보를 넘겨줘야 하므로 데이터베이스 접근.
+        user_liquor = []
+        like_liquor = []
+        hate_liquor = []
         if len(history) == 0:
             liquor_list = MyLiquor.objects.filter(
-                user_id=request.user.id).prefetch_related("my_liquor", "my_user")
-            # user_liquor = [i for i in liquor_list.filter(status="1")]  # 내가 가진 술
-            # like_liquor = [i for i in liquor_list.filter(status="2")]  # 내가 좋아하는 술
-            # hate_liquor = [i for i in liquor_list.filter(status="3")]  # 내가 싫어하는 술
-
-        # 딕셔너리 형태로 받았기에 json으로 변환해서 보내야함.
+                user_id=request.user.id).prefetch_related("liquor", "user")
+            user_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="1")]  # 내가 가진 술
+            like_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="2")]  # 내가 좋아하는 술
+            hate_liquor = [i.liquor.name for i in liquor_list.filter(
+                status="3")]  # 내가 싫어하는 술
         new_history = btd_bot(message, message_history=history,
-                              # user_liquor=user_liquor, like_liquor=like_liquor, hate_liquor=hate_liquor
+                              user_liquor=user_liquor, like_liquor=like_liquor, hate_liquor=hate_liquor
                               )
-
+        print(new_history[-1]['content'])
         return Response(new_history, status=status.HTTP_200_OK)
 
 

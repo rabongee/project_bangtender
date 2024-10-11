@@ -158,6 +158,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
@@ -173,3 +174,10 @@ CORS_ALLOW_METHODS = (
     "POST",
     "PUT",
 )
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # 메모리 기반 캐시
+        'LOCATION': 'unique-snowflake',
+    }
+}
