@@ -174,3 +174,10 @@ CORS_ALLOW_METHODS = (
     "POST",
     "PUT",
 )
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # 메모리 기반 캐시
+        'LOCATION': 'unique-snowflake',
+    }
+}
