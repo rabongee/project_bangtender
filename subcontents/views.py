@@ -15,7 +15,7 @@ from rest_framework import pagination
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import MyLiquor
 from .functions import btd_bot
-
+from django.core.cache import cache
 # Create your views here.
 
 
@@ -33,35 +33,67 @@ class InfoAPIView(APIView):
 class MainPageAPIView(APIView):
     def get(self, request):
         response_seri = {}
-        # info 랜덤 데이터 가져오기
-        response_seri['info'] = InfoSerializer(choice(Info.objects.all())).data
 
-        # 랜덤 칵테일 데이터 3개 가져오기
-        response_seri['cocktail_list'] = CocktailListSerializer(
-            sample(list(Cocktail.objects.all()), 3), many=True).data
+        # info 랜덤 데이터 하루에 한번 가져오기
+        info_cache_key = 'random_info'
+        random_info = cache.get(info_cache_key)
+        if not random_info:
+            random_info = InfoSerializer(choice(Info.objects.all())).data
+            cache.set(info_cache_key, random_info,
+                      timeout=86400)  # 24시간 (하루) 캐시 저장
+        response_seri['info'] = random_info
 
-        # 로그인 안되어 있다면
+        # 랜덤 칵테일 데이터 3개 하루에 한번 가져오기
+        cocktail_cache_key = 'random_cocktail_list'
+        random_cocktail_list = cache.get(cocktail_cache_key)
+        if not random_cocktail_list:
+            random_cocktail_list = CocktailListSerializer(
+                sample(list(Cocktail.objects.all()), 3), many=True
+            ).data
+            cache.set(cocktail_cache_key, random_cocktail_list,
+                      timeout=86400)  # 24시간 (하루) 캐시 저장
+        response_seri['cocktail_list'] = random_cocktail_list
+
+        # 로그인 안되었으면
         if not request.user.id:
             return Response(response_seri, status=status.HTTP_200_OK)
 
         # 사용자 맞춤 추천 데이터 가져오기
         liquor_list = MyLiquor.objects.filter(
-            user_id=request.user.id).prefetch_related("liquor", "user")
+            user_id=request.user.id
+        ).prefetch_related("liquor", "user")
+
         # 가진 술 및 좋아하는 술 종류
         like_classification = set(
-            [i.liquor.classification for i in liquor_list.filter(status__in=["1", "2"])])
+            [i.liquor.classification for i in liquor_list.filter(status__in=[
+                                                                 "1", "2"])]
+        )
+
         # 싫어하는 술
         hate_liquor = [i.liquor.name for i in liquor_list.filter(status="3")]
-        # 가진 술 및 좋아하는 술이 없다면
+
+        # 가진 술 및 좋아하는 술이 없으면
         if not like_classification:
             response_seri['user_liquor_list'] = '사용자 데이터가 등록되지 않았습니다.'
             return Response(response_seri, status=status.HTTP_200_OK)
 
-        # 랜덤 사용자 맞춤 술 데이터 3개 가져오기
-        random_custom_liquor = sample(list(Liquor.objects.filter(
-            classification__in=like_classification).exclude(name__in=hate_liquor)), 3)
+        # 랜덤 사용자 맞춤 술 데이터 3개 가져오기, 하루에 한번
+        liquor_cache_key = f'random_custom_liquor_{request.user.id}'
+        random_custom_liquor = cache.get(liquor_cache_key)
+        if not random_custom_liquor:
+            random_custom_liquor = sample(
+                list(
+                    Liquor.objects.filter(
+                        classification__in=like_classification
+                    ).exclude(name__in=hate_liquor)
+                ),
+                3
+            )
+            cache.set(liquor_cache_key, random_custom_liquor,
+                      timeout=86400)  # 24시간 (하루) 캐시 저장
         response_seri['user_liquor_list'] = LiquorListSerializer(
             random_custom_liquor, many=True).data
+
         return Response(response_seri, status=status.HTTP_200_OK)
 
 # 검색 기능
