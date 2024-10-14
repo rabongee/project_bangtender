@@ -24,10 +24,8 @@ class LiquorListView(ListCreateAPIView):
     def get_queryset(self):
         liquor = Liquor.objects.all()
         # classification 필터링 추가
-        classification = self.request.query_params.get('classification')
-        if classification.lower() == 'all':
-            liquor = Liquor.objects.all()
-        elif classification:
+        classification = self.request.query_params.get('classification', 'all')
+        if classification != 'all':
             liquor = liquor.filter(classification=classification)
         return liquor
 
