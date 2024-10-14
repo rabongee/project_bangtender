@@ -34,13 +34,8 @@ class MainPageAPIView(APIView):
     def get(self, request):
         response_seri = {}
 
-        # info 랜덤 데이터 하루에 한번 가져오기
-        info_cache_key = 'random_info'
-        random_info = cache.get(info_cache_key)
-        if not random_info:
-            random_info = InfoSerializer(choice(Info.objects.all())).data
-            cache.set(info_cache_key, random_info,
-                      timeout=86400)  # 24시간 (하루) 캐시 저장
+        # info 랜덤 데이터 가져오기
+        random_info = InfoSerializer(choice(Info.objects.all())).data
         response_seri['info'] = random_info
 
         # 랜덤 칵테일 데이터 3개 하루에 한번 가져오기
