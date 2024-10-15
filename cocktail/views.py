@@ -101,4 +101,4 @@ class CocktailDetailView(APIView):
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
         cocktail.delete()
-        return Response({"message": "게시글 삭제 완료"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"message": "게시글 삭제 완료"})
