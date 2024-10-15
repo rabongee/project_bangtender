@@ -33,18 +33,27 @@ class MainPageAPIView(APIView):
         response_seri = {}
 
         # info 랜덤 데이터 가져오기
-        random_info = InfoSerializer(choice(Info.objects.all())).data
+        try:
+            random_info = InfoSerializer(choice(Info.objects.all())).data
+        except (IndexError):
+            # info 데이터 없을시
+            random_info = {'아직 알려드릴 정보가 없네요'}
         response_seri['info'] = random_info
 
         # 랜덤 칵테일 데이터 3개 하루에 한번 가져오기
         cocktail_cache_key = 'random_cocktail_list'
         random_cocktail_list = cache.get(cocktail_cache_key)
         if not random_cocktail_list:
-            random_cocktail_list = CocktailListSerializer(
-                sample(list(Cocktail.objects.all()), 3), many=True
-            ).data
-            cache.set(cocktail_cache_key, random_cocktail_list,
-                      timeout=86400)  # 24시간 (하루) 캐시 저장
+            # 칵테일 데이터가 없으면 빈 데이터
+            try:
+                random_cocktail_list = CocktailListSerializer(
+                    sample(list(Cocktail.objects.all()), 3), many=True
+                ).data
+                cache.set(cocktail_cache_key, random_cocktail_list,
+                          timeout=86400)  # 24시간 (하루) 캐시 저장
+            except (IndexError):
+                response_seri['cocktail_list'] = {
+                    '데이터 베이스에 칵테일 데이터가 3개 미만입니다. 데이터를 더 넣어주세요.'}
         response_seri['cocktail_list'] = random_cocktail_list
 
         # 로그인 안되었으면
@@ -56,37 +65,51 @@ class MainPageAPIView(APIView):
             user_id=request.user.id
         ).prefetch_related("liquor", "user")
 
-        # 가진 술 및 좋아하는 술 종류
-        like_classification = set(
-            [i.liquor.classification for i in liquor_list.filter(status__in=[
-                                                                 "1", "2"])]
+        # 가진 술 및 좋아하는 술 이름
+        own_like_liquor = set(
+            [i.liquor.name for i in liquor_list.filter(status__in=[
+                "1", "2"])]
         )
-
-        # 싫어하는 술
-        hate_liquor = [i.liquor.name for i in liquor_list.filter(status="3")]
-
+        own_like_classification = set(
+            [i.liquor.classification for i in liquor_list.filter(status__in=[
+                "1", "2"])]
+        )
         # 가진 술 및 좋아하는 술이 없으면
-        if not like_classification:
+        if not own_like_liquor:
             response_seri['user_liquor_list'] = '사용자 데이터가 등록되지 않았습니다.'
             return Response(response_seri, status=status.HTTP_200_OK)
 
-        # 랜덤 사용자 맞춤 술 데이터 3개 가져오기, 하루에 한번
+        # 랜덤 사용자 맞춤 칵테일 데이터 3개 가져오기, 하루에 한번
+        # 가지고 있거나 좋아하는 술이 들어간 칵테일 혹은 같은 classification이 들어간 칵테일 랜덤으로 가져옴
         liquor_cache_key = f'random_custom_liquor_{request.user.id}'
         random_custom_liquor = cache.get(liquor_cache_key)
-        if not random_custom_liquor:
-            random_custom_liquor = sample(
-                list(
-                    Liquor.objects.filter(
-                        classification__in=like_classification
-                    ).exclude(name__in=hate_liquor)
-                ),
-                3
-            )
-            cache.set(liquor_cache_key, random_custom_liquor,
-                      timeout=86400)  # 24시간 (하루) 캐시 저장
-        response_seri['user_liquor_list'] = LiquorListSerializer(
-            random_custom_liquor, many=True).data
 
+        try:
+            # 캐시에 등록된 데이터가 없으면
+            if not random_custom_liquor:
+                # 기주 쿼리
+                liquor_query = Q()
+                for keyword in own_like_liquor:
+                    liquor_query |= Q(ingredients__icontains=keyword)
+
+                # 분류 쿼리
+                classification_query = Q()
+                for keyword in own_like_classification:
+                    classification_query |= Q(ingredients__icontains=keyword)
+
+                random_custom_liquor = sample(
+                    list(
+                        Cocktail.objects.filter(
+                            liquor_query | classification_query)
+                    ),
+                    3
+                )
+                cache.set(liquor_cache_key, random_custom_liquor,
+                          timeout=86400)  # 24시간 (하루) 캐시 저장
+            response_seri['user_liquor_list'] = CocktailListSerializer(
+                random_custom_liquor, many=True).data
+        except (IndexError):
+            response_seri["user_liquor_list"] = '사용자 맞춤으로 추천할 칵테일이 없네요...ㅠㅠ'
         return Response(response_seri, status=status.HTTP_200_OK)
 
 
@@ -107,7 +130,6 @@ class SearchAPIView(APIView):
         items['cocktail_list'] = CocktailListSerializer(
             cocktail_list, many=True).data
         if not items:
-            # 상태코드 확인해야 함!!!!!!!
             return Response({"message": "검색된 결과가 없습니다."}, status=status.HTTP_200_OK)
         return Response(items, status=status.HTTP_200_OK)
 

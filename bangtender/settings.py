@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'import_export',
     "corsheaders",
+    'psycopg2',
 
     # app
     'accounts',
