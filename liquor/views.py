@@ -74,7 +74,10 @@ class LiquorDetailView(APIView):
     def get(self, request, pk):
         liquor = get_object_or_404(Liquor, pk=pk)
         serializer = LiquorDetailSerializer(liquor)
-        return Response(serializer.data)
+        res_data = serializer.data
+        if request.user:
+            res_data['is_superuser'] = request.user.is_superuser
+        return Response(res_data)
 
     # 게시글 수정
     def put(self, request, pk):

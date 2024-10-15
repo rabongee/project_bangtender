@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from .models import Info
 from .serializers import InfoSerializer
@@ -11,7 +10,6 @@ from liquor.models import Liquor
 from liquor.serializers import LiquorListSerializer
 from django.db.models import Q
 from rest_framework import pagination
-
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import MyLiquor
 from .functions import btd_bot
@@ -91,9 +89,8 @@ class MainPageAPIView(APIView):
 
         return Response(response_seri, status=status.HTTP_200_OK)
 
+
 # 검색 기능
-
-
 class SearchAPIView(APIView):
     def get(self, request):
         message = request.query_params.get("message")
