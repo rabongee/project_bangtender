@@ -17,6 +17,7 @@ class CocktailListView(ListAPIView):
     # 칵테일 목록 조회
     serializer_class = CocktailListSerializer
     pagination_class = RecordPagination
+
     def get_queryset(self):
         cocktail = Cocktail.objects.all()
         return cocktail
@@ -57,7 +58,6 @@ class CocktailBookmarkView(APIView):
             return Response({"message": "북마크 완료"}, status=status.HTTP_201_CREATED)
 
 
-
 # 칵테일 디테일 페이지 조회(GET/누구나 이용 가능) 및 수정(PUT/관리자만), 삭제(DELETE/관리자만)
 class CocktailDetailView(APIView):
     # 인증된 회원(회원or관리자)만 가능 or 누구나 이용 가능
@@ -68,7 +68,10 @@ class CocktailDetailView(APIView):
     def get(self, request, pk):
         cocktail = get_object_or_404(Cocktail, pk=pk)
         serializer = CocktailDetailSerializer(cocktail)
-        return Response(serializer.data)
+        res_data = serializer.data
+        if request.user:
+            res_data['is_superuser'] = request.user.is_superuser
+        return Response(res_data)
 
     # 게시글 수정
     def put(self, request, pk):
@@ -78,7 +81,8 @@ class CocktailDetailView(APIView):
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
         # 검증 로직
-        is_valid, error_message = validator_cocktail(request.data, cocktail_instance=cocktail)
+        is_valid, error_message = validator_cocktail(
+            request.data, cocktail_instance=cocktail)
         if not is_valid:
             return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -98,4 +102,3 @@ class CocktailDetailView(APIView):
 
         cocktail.delete()
         return Response({"message": "게시글 삭제 완료"}, status=status.HTTP_403_FORBIDDEN)
-
