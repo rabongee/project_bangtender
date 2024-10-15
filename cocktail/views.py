@@ -22,6 +22,13 @@ class CocktailListView(ListAPIView):
         cocktail = Cocktail.objects.all()
         return cocktail
 
+    def get(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        if request.user:
+            response.data['is_superuser'] = request.user.is_superuser
+        return Response(response.data)
+
     # 게시글 등록
     def post(self, request):
         # 관리자 확인 코드
