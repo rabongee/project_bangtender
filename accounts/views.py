@@ -117,9 +117,15 @@ class UserAPIView(APIView):
 
     def get(self, request, pk):
         user = self.get_user_object(pk)
+        liquor = Liquor.objects.all()
         if user == request.user:
-            serializer = UserLiquorSerializer(user)
-            return Response(serializer.data)
+            res_data = {}
+            user_serializer = UserLiquorSerializer(user)
+            liquor_serializer = LiquorListSerializer(
+                liquor, exclude_fields=["price", "img"], many=True)
+            res_data['user_data'] = user_serializer.data
+            res_data['liquor_data'] = liquor_serializer.data
+            return Response(res_data)
         else:
             return Response({"message": "로그인한 유저와 다릅니다."}, status=status.HTTP_403_FORBIDDEN)
 

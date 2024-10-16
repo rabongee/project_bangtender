@@ -11,7 +11,16 @@ class LiquorListSerializer(serializers.ModelSerializer):
             "price",
             "img",
         ]
-# postman에서 조회하기 어려워 id 임시 추가!!!
+
+    def __init__(self, *args, **kwargs):
+        # kwargs에 'exclude_fields' 인자를 받는 경우 해당 필드를 제외
+        exclude_fields = kwargs.pop('exclude_fields', None)
+        super().__init__(*args, **kwargs)
+
+        if exclude_fields:
+            for field in exclude_fields:
+                self.fields.pop(field)
+
 
 class LiquorDetailSerializer(serializers.ModelSerializer):
     class Meta:
