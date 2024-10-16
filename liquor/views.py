@@ -14,16 +14,23 @@ from liquor.validators import validator_liquor
 
 
 class LiquorListView(ListCreateAPIView):
-    # 인증된 회원(회원or관리자)만 가능 or 누구나 이용 가능
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    """주류 게시글 조회 및 등록 APIView
+    
+    * get()
+    비로그인 유저도 접근 가능
 
-    # 주류 목록 조회
+    * post()
+    superuser만 가능
+    
+    """
+    
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = LiquorListSerializer
     pagination_class = RecordPagination
 
+    # 
     def get_queryset(self):
         liquor = Liquor.objects.all()
-        # classification 필터링 추가
         classification = self.request.query_params.get('classification', 'all')
         if classification != 'all':
             liquor = liquor.filter(classification=classification)
