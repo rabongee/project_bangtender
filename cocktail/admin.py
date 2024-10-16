@@ -5,7 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 
 
 class CocktailAdmin(ImportExportModelAdmin):
-    pass
+    exclude = ['bookmark']
 
 
 admin.site.register(Cocktail, CocktailAdmin)
