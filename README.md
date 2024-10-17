@@ -208,9 +208,9 @@ python manage.py runserver
 - **Django REST Framework**: API 설계를 위한 프레임워크
 - **postgresql**: 데이터베이스
 - **JWT**: 사용자 인증을 위한 토큰 방식 인증 시스템
-- **ChatGPT**: GPT-4o-mini
+- **ChatGPT**: gpt-3.5-turbo-1106
 - **bcrypt**: 사용자 비밀번호 해싱
-
+- **Django cache**: 시간별 데이터 자동 업데이트 시스템 구축을 위한 캐시 사용
 ---
 
 ## 🌕 개발 환경 및 사용 기술
@@ -222,6 +222,7 @@ python manage.py runserver
     djangorestframework-simplejwt 5.3.1
     chatGPT GPT-4o-mini
     bycrypt 4.2
+    DBeaver
 
 ---
 
