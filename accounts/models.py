@@ -38,6 +38,20 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """User 모델
+    
+    Keyword arguments:
+    username: User 닉네임
+    name: User 이름
+    is_superuser: 관리자인지 판단
+    is_staff: 스탭인지 판단
+    is_active: 활동중인지 판단
+    email: User 이메일
+    address: User 주소
+    date_joined: User 가입날짜
+
+    """
+    
     username = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=20)
     is_superuser = models.BooleanField(default=False)

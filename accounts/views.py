@@ -18,6 +18,15 @@ from cocktail.serializers import CocktailListSerializer
 
 
 class AccountView(APIView):
+    """회원가입 및 회원탈퇴 APIView
+
+    * POST
+    비로그인 유저도 접근 가능
+
+    * DELETE
+    로그인한 유저만 가능
+    """
+
     def get_permissions(self):
         if self.request.method == 'POST':
             return [AllowAny()]
@@ -53,6 +62,12 @@ class AccountView(APIView):
 
 
 class LoginView(APIView):
+    """로그인 APIView
+
+    * POST
+    비로그인 유저도 접근 가능
+    """
+
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
@@ -77,6 +92,12 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    """로그아웃 APIView
+
+    * post
+    로그인한 유저만 가능
+    """
+
     def post(self, request):
         refresh_token_str = request.data.get("refresh_token")
         try:
@@ -89,6 +110,12 @@ class LogoutView(APIView):
 
 
 class ChangePasswordView(APIView):
+    """비밀번호 변경 APIView
+
+    * PUT
+    로그인한 유저만 가능
+    """
+
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
@@ -110,6 +137,15 @@ class ChangePasswordView(APIView):
 
 
 class UserAPIView(APIView):
+    """회원정보 APIView
+
+    * GET
+    로그인한 유저만 사용가능
+
+    * PUT
+    로그인한 유저만 사용가능
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get_user_object(self, pk):
@@ -178,6 +214,12 @@ class UserAPIView(APIView):
 
 
 class MyBookmarkListView(APIView):
+    """내 북마크 APIView
+
+    * GET
+    로그인한 유저만 가능
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):

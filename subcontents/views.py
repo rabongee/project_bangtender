@@ -19,9 +19,13 @@ from django.core.cache import cache
 
 class InfoAPIView(APIView):
     """Info데이터 저장하는 APIView
+    * POST
+
     """
 
     def post(self, request):
+        if not request.user.is_superuser:
+            return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
         serializer = InfoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -32,6 +36,9 @@ class InfoAPIView(APIView):
 
 class MainPageAPIView(APIView):
     """메인페이지 데이터 불러오는 APIView
+
+    *GET
+    비로그인 유저도 사용 가능
 
     * response_seri['info' | 'cocktail_list' | 'user_liquor_list']
     info: 매 API 호출 시 랜덤 info 데이터

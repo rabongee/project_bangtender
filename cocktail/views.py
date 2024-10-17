@@ -12,9 +12,17 @@ from rest_framework.generics import ListAPIView
 
 # 칵테일 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
 class CocktailListView(ListAPIView):
+    """Cocktail APIView
+
+    * GET
+    비로그인 유저도 접근 가능
+
+    * POST
+    관리자만 가능
+
+    """
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # 칵테일 목록 조회
     serializer_class = CocktailListSerializer
     pagination_class = RecordPagination
 
@@ -29,13 +37,10 @@ class CocktailListView(ListAPIView):
             response.data['is_superuser'] = request.user.is_superuser
         return Response(response.data)
 
-    # 게시글 등록
     def post(self, request):
-        # 관리자 확인 코드
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
-        # 검증 로직
         is_valid, error_message = validator_cocktail(request.data)
         if not is_valid:
             return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
@@ -49,7 +54,13 @@ class CocktailListView(ListAPIView):
 
 # 북마크 기능(POST/ 회원만 가능)
 class CocktailBookmarkView(APIView):
-    permission_classes = [IsAuthenticated]  # 회원만 가능
+    """Cocktail Bookmark APIView
+
+    * POST
+    로그인한 유저만 가능
+    """
+
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
         if not request.user.is_authenticated:
@@ -67,11 +78,20 @@ class CocktailBookmarkView(APIView):
 
 # 칵테일 디테일 페이지 조회(GET/누구나 이용 가능) 및 수정(PUT/관리자만), 삭제(DELETE/관리자만)
 class CocktailDetailView(APIView):
-    # 인증된 회원(회원or관리자)만 가능 or 누구나 이용 가능
+    """Cocktail 상세 페이지 조회, 수정 및 삭제
+
+    * GET
+    비로그인 유저도 접근 가능
+
+    * PUT
+    superuser만 가능
+
+    * DELETE
+    superuser만 가능
+    """
 
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # 칵테일 디테일 페이지 조회
     def get(self, request, pk):
         cocktail = get_object_or_404(Cocktail, pk=pk)
         serializer = CocktailDetailSerializer(cocktail)
@@ -80,14 +100,11 @@ class CocktailDetailView(APIView):
             res_data['is_superuser'] = request.user.is_superuser
         return Response(res_data)
 
-    # 게시글 수정
     def put(self, request, pk):
         cocktail = get_object_or_404(Cocktail, pk=pk)
-        # 관리자 확인 코드
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
-        # 검증 로직
         is_valid, error_message = validator_cocktail(
             request.data, cocktail_instance=cocktail)
         if not is_valid:
@@ -100,12 +117,9 @@ class CocktailDetailView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # 게시글 삭제
     def delete(self, request, pk):
         cocktail = get_object_or_404(Cocktail, pk=pk)
-        # 관리자 확인 코드
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
-
         cocktail.delete()
         return Response({"message": "게시글 삭제 완료"})

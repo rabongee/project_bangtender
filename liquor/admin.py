@@ -5,7 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 
 
 class LiquorAdmin(ImportExportModelAdmin):
-    """관리자 페이지 Liquor 추가
+    """관리자 페이지 Liquor ImportExport
     """
 
     exclude = ['bookmark']

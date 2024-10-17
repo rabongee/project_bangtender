@@ -14,10 +14,10 @@ from django.db.models import Q
 class LiquorListView(ListCreateAPIView):
     """주류 게시글 조회 및 등록 APIView
 
-    * get
+    * GET
     비로그인 유저도 접근 가능
 
-    * post
+    * POST
     superuser만 가능
 
     """
@@ -60,9 +60,9 @@ class LiquorListView(ListCreateAPIView):
 
 
 class LiquorBookmarkView(APIView):
-    """북마크 APIView
+    """Liquor Bookmark APIView
     
-    * post
+    * POST
     로그인 한 유저만 가능
     """
     
@@ -83,15 +83,15 @@ class LiquorBookmarkView(APIView):
 
 
 class LiquorDetailView(APIView):
-    """주류 상세 페이지 조회, 수정 및 삭제
+    """Liquor 상세 페이지 조회, 수정 및 삭제
     
-    * get
+    * GET
     비로그인 유저도 이용가능
 
-    * put
+    * PUT
     superuser만 가능
 
-    * delete
+    * DELETE
     superuser만 가능
     """
     
