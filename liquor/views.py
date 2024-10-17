@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -9,30 +8,32 @@ from .serializers import LiquorListSerializer, LiquorDetailSerializer
 from subcontents.views import RecordPagination
 from rest_framework.generics import ListCreateAPIView
 from liquor.validators import validator_liquor
-
-# 주류 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
+from django.db.models import Q
 
 
 class LiquorListView(ListCreateAPIView):
     """주류 게시글 조회 및 등록 APIView
-    
-    * get()
+
+    * get
     비로그인 유저도 접근 가능
 
-    * post()
+    * post
     superuser만 가능
-    
+
     """
-    
+
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = LiquorListSerializer
     pagination_class = RecordPagination
 
-    # 
+    #
     def get_queryset(self):
         liquor = Liquor.objects.all()
         classification = self.request.query_params.get('classification', 'all')
-        if classification != 'all':
+        if classification == 'others':
+            liquor = liquor.exclude(
+                Q(classification='위스키') | Q(classification='진') | Q(classification='럼') | Q(classification='보드카') | Q(classification='리큐르') | Q(classification='브랜디'))
+        elif classification != 'all':
             liquor = liquor.filter(classification=classification)
         return liquor
 
@@ -43,13 +44,10 @@ class LiquorListView(ListCreateAPIView):
             response.data['is_superuser'] = request.user.is_superuser
         return Response(response.data)
 
-    # 게시글 등록
     def post(self, request):
-        # 관리자인지 확인하는 코드 추가
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
-        # 검증 로직
         is_valid, error_message = validator_liquor(request.data)
         if not is_valid:
             return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
@@ -61,8 +59,13 @@ class LiquorListView(ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 북마크 기능(POST/ 회원만 가능)
 class LiquorBookmarkView(APIView):
+    """북마크 APIView
+    
+    * post
+    로그인 한 유저만 가능
+    """
+    
     permission_classes = [IsAuthenticated]  # 회원만 가능
 
     def post(self, request, pk):
@@ -79,12 +82,21 @@ class LiquorBookmarkView(APIView):
             return Response({"message": "북마크 완료"}, status=status.HTTP_201_CREATED)
 
 
-# 주류 디테일 페이지 조회(GET/누구나 이용 가능) 및 수정(PUT/관리자만), 삭제(DELETE/관리자만)
 class LiquorDetailView(APIView):
-    # 인증된 회원(회원or관리자)만 가능 or 누구나 이용 가능
+    """주류 상세 페이지 조회, 수정 및 삭제
+    
+    * get
+    비로그인 유저도 이용가능
+
+    * put
+    superuser만 가능
+
+    * delete
+    superuser만 가능
+    """
+    
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # 주류 디테일 페이지 조회
     def get(self, request, pk):
         liquor = get_object_or_404(Liquor, pk=pk)
         serializer = LiquorDetailSerializer(liquor)
@@ -93,14 +105,11 @@ class LiquorDetailView(APIView):
             res_data['is_superuser'] = request.user.is_superuser
         return Response(res_data)
 
-    # 게시글 수정
     def put(self, request, pk):
         liquor = get_object_or_404(Liquor, pk=pk)
-        # 관리자인지 확인하는 코드 추가
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
-        # 검증 로직
         is_valid, error_message = validator_liquor(
             request.data, liquor_instance=liquor)
         if not is_valid:
@@ -113,10 +122,8 @@ class LiquorDetailView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # 게시글 삭제
     def delete(self, request, pk):
         liquor = get_object_or_404(Liquor, pk=pk)
-        # 관리자인지 확인하는 코드 추가
         if not request.user.is_superuser:
             return Response({"detail": "접근 불가 / 관리자만 가능"}, status=status.HTTP_403_FORBIDDEN)
 
