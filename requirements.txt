@@ -41,7 +41,8 @@ openai==1.50.0
 parso==0.8.4
 pillow==10.4.0
 prompt_toolkit==3.0.48
-psycopg2==2.9.9
+# 현재 postgresql 데이터베이스 접속 정보가 없어 주석처리
+# psycopg2==2.9.9
 pure_eval==0.2.3
 pydantic==2.9.2
 pydantic_core==2.23.4
@@ -62,3 +63,5 @@ tzdata==2024.2
 urllib3==2.2.3
 vine==5.1.0
 wcwidth==0.2.13
+# gunicorn 설치가 없어 추가하였음. (Docker-compose에서 설치)
+gunicorn==20.1.0
