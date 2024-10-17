@@ -161,10 +161,10 @@ python manage.py runserver
 
 | **메소드** | **엔드포인트**            | **설명**                          | **요청 본문**                           | **비고**     |
 |------------|--------------------------|----------------------------------|----------------------------------------|-------------|
-| GET        | /api/v1/            | 메인 페이지                   | 없음                                   |         |
-| GET        | /api/v1/search/            | 검색 기능                        | `message`                 |         |
-| POST        | /api/v1/subcontent/fine-tuning/       | 파인튜닝                   | `진행중`                                   |         |
-| GET        | /api/v1/subcontent/bangtenderbot/       | 추천 AI                       | `진행중`                              |         |
+| GET        | /api/v1/subcontent/            | 메인 페이지                   | 없음                                   |         |
+| GET        | /api/v1/subcontent/search/            | 검색 기능                        | `message`                 |         |
+| POST        | /api/v1/subcontent/info/       | info 저장                   | `진행중`                                   |         |
+| POST        | /api/v1/subcontent/bangtenderbot/       | 추천 AI                       | `진행중`                              |         |
 | GET     | /api/v1/subcontent/map/       | 주변 주류매장 찾기                      | `map`                                   |         |
 
 
