@@ -6,20 +6,26 @@ from cocktail.models import Cocktail
 
 
 def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquor=[], like_liquor=[], hate_liquor=[]):
+    """방텐더봇 function
+
+    * OpenAI
+    model: gpt-3.5-turbo-1106
+    system_prompt: 장고 ORM을 통해 데이터베이스에 있는 양주, 칵테일, 사용자 정보등을 넘겨줌
+
+
+    """
+
     query_liquor = Liquor.objects.values('name', 'classification')
-    # 양주 카테고리
-    # flat속성은 튜플형태에서 리스트 형태로 바꿔줌
     liquor_classification = query_liquor.values_list(
         'classification', flat=True).distinct()
     query_cocktail = Cocktail.objects.values_list('name', flat=True)
     client = OpenAI(api_key=openai_api_key)
+
+    # 시스템 프롬프트
     system_instruction = f"""너는 최고의 바텐더야. 사용자의 질문에 대답해줘.
         대답에 관한 주류는 """
-
-    # 각 양주 종류에 관한 데이터 프롬프트에 추가하는 함수
     for i in liquor_classification:
         system_instruction += f"""{i} 종류는 {query_liquor.filter(classification = i).values_list('name', flat=True)}여기에서"""
-
     system_instruction += f"""
         칵테일 종류는 {query_cocktail}여기에서
         있는 주류로만 찾아줘
@@ -42,9 +48,9 @@ def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquo
         이렇게 출력해줘
         
         """
-    if len(message_history) == 0:
-        # 최초 질문
 
+    # 최초 질문
+    if len(message_history) == 0:
         message_history.append(
             {
                 "role": "system", "content": system_instruction
@@ -63,6 +69,7 @@ def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquo
         model=model,
         messages=message_history,
     )
+
     # 사용자 질문에 대한 답변을 추가
     message_history.append(
         {"role": "assistant",

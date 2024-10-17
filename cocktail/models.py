@@ -4,6 +4,18 @@ from bangtender.base_models import CommonFields
 
 
 class Cocktail(CommonFields):
+    """Cocktail 모델
+
+    Keyword arguments:
+    name: Cocktail 이름
+    img: Cocktail 이미지
+    content: Cocktail 내용
+    ingredients: Cocktail 재료
+    taste: Cocktail 맛
+    abv: Cocktail 도수
+    bookmark: Cocktail 북마크 외래키 참조 필드
+    """
+
     name = models.CharField(max_length=200)
     img = models.ImageField(upload_to='cocktails/')
     content = models.TextField()

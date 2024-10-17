@@ -33,4 +33,4 @@ class LiquorDetailSerializer(serializers.ModelSerializer):
             "taste",
             "abv",
             "price",
-        ]  # 모델의 모든 필드를 직렬화
+        ]

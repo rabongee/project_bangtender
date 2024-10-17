@@ -5,6 +5,8 @@ from import_export.admin import ImportExportModelAdmin
 
 
 class CocktailAdmin(ImportExportModelAdmin):
+    """관리자 페이지 Cocktail ImportExport
+    """
     exclude = ['bookmark']
 
 
