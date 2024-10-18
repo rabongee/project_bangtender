@@ -190,6 +190,13 @@ CACHES = {
     }
 }
 
+# HTTPS 적용을 위한 설정 추가
+SESSION_COOKIE_SECURE = True  # 세션 쿠키를 HTTPS에서만 전송
+CSRF_COOKIE_SECURE = True  # CSRF 쿠키를 HTTPS에서만 전송
+SECURE_HSTS_SECONDS = 3600  # HSTS 설정
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # 서브도메인도 HTTPS 적용
+SECURE_HSTS_PRELOAD = True  # HSTS Preload 적용
+
 # S3 setting
 INSTALLED_APPS += ['storages']
 
