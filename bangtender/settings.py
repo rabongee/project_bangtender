@@ -191,7 +191,6 @@ CACHES = {
 }
 
 # HTTPS 적용을 위한 설정 추가
-SECURE_SSL_REDIRECT = True  # HTTP 요청을 HTTPS로 자동 리디렉션
 SESSION_COOKIE_SECURE = True  # 세션 쿠키를 HTTPS에서만 전송
 CSRF_COOKIE_SECURE = True  # CSRF 쿠키를 HTTPS에서만 전송
 SECURE_HSTS_SECONDS = 3600  # HSTS 설정
