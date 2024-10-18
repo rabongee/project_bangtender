@@ -28,9 +28,10 @@ SECRET_KEY = django_secret_key
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "43.203.219.114",
+    "3.37.67.87",
     "localhost",
     "127.0.0.1",
+    "api.bangtender.store",
 ]
 
 
