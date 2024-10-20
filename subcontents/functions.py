@@ -1,9 +1,12 @@
 from openai import OpenAI
-from config import openai_api_key
-
+from dotenv import load_dotenv
+import os
 from liquor.models import Liquor
 from cocktail.models import Cocktail
 
+load_dotenv()
+
+openai_api_key = os.getenv('OPEN_API_KEY')
 
 def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquor=[], like_liquor=[], hate_liquor=[]):
     """방텐더봇 function

@@ -15,9 +15,9 @@ from accounts.models import MyLiquor
 from .functions import btd_bot
 from django.core.cache import cache
 from collections import OrderedDict
+
+
 # Create your views here.
-
-
 class InfoAPIView(APIView):
     """Info데이터 저장하는 APIView
     * POST
