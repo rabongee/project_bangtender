@@ -27,11 +27,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 
 # Application definition
-
 INSTALLED_APPS = [
     # middleware
     'django.contrib.admin',
@@ -187,6 +187,9 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+
+# HTTPS 적용을 위한 설정 추가
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # HTTPS인지 인식해줌
 
 # S3 setting
 INSTALLED_APPS += ['storages']

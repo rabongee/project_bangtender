@@ -1,0 +1,42 @@
+name: EC2 deploy
+
+on:
+  push:
+    branches: [ dev, main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH Access
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -p ${{ secrets.EC2_PORT }} ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to EC2
+      env:
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_PORT: ${{ secrets.EC2_PORT }}
+      run: |
+        ssh -i ~/.ssh/id_rsa -p $EC2_PORT $EC2_USER@$EC2_HOST << 'EOF'
+          pkill -f gunicorn || true
+
+          cd ~/project_bangtender
+
+          git pull origin dev
+
+          source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          python manage.py migrate
+
+          gunicorn project_bangtender.wsgi:application --bind 0.0.0.0:8000 --daemon
+          sudo nginx -t && sudo systemctl reload nginx
+        EOF
