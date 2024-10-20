@@ -25,7 +25,8 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = True  # 에러메세지 확인을 위한 개발 모드
+# DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
@@ -169,7 +170,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5500",
     "http://127.0.0.1:5500",
-    "https://api.bangtender.store",
+    "https://bangtender.store",
     "https://www.bangtender.store",
 ]
 
