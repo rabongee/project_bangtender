@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from .models import Info
 from .serializers import InfoSerializer
-from random import choice, sample
+from random import sample
 from cocktail.models import Cocktail
 from cocktail.serializers import CocktailListSerializer
 from rest_framework.response import Response
@@ -12,7 +12,7 @@ from django.db.models import Q
 from rest_framework import pagination
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import MyLiquor
-from .functions import btd_bot
+from .functions import btd_bot, get_info
 from django.core.cache import cache
 
 
@@ -59,11 +59,8 @@ class MainPageAPIView(APIView):
         response_seri = {}
 
         # Info
-        try:
-            random_info = InfoSerializer(choice(Info.objects.all())).data
-        except (IndexError):
-            random_info = {'아직 알려드릴 정보가 없네요'}
-        response_seri['info'] = random_info
+        cache.delete("random_info")
+        response_seri['info'] = get_info()
 
         # 랜덤 칵테일
         cocktail_cache_key = 'random_cocktail_list'
@@ -171,7 +168,6 @@ class RecordPagination(pagination.CursorPagination):
                     "next": self.get_next_link(),
                     "previous": self.get_previous_link(),
                     "records": data,
-                    "info": InfoSerializer(choice(Info.objects.all())).data
                 },
             },
             status=status.HTTP_200_OK,

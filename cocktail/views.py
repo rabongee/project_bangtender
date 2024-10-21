@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from subcontents.views import RecordPagination
 from rest_framework.generics import ListAPIView
+from subcontents.functions import get_info
+from django.core.cache import cache
 
 
 # 칵테일 목록 조회(GET/ 누구나 이용 가능) 및 등록(POST/ 관리자만 가능)
@@ -32,6 +34,12 @@ class CocktailListView(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
+
+        if 'liquor' != cache.get('cocktail_path'):
+            cache.delete("liquor_path")
+            cache.delete('random_info')
+            cache.set("cocktail_path", "liquor")
+        response.data['info'] = get_info()
 
         if request.user:
             response.data['is_superuser'] = request.user.is_superuser

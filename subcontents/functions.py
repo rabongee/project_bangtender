@@ -3,10 +3,26 @@ from dotenv import load_dotenv
 import os
 from liquor.models import Liquor
 from cocktail.models import Cocktail
+from django.core.cache import cache
+from random import choice
+from subcontents.models import Info
+from subcontents.serializers import InfoSerializer
 
 load_dotenv()
 
 openai_api_key = os.getenv('OPEN_API_KEY')
+
+def get_info():
+    
+    info_cache_key = 'random_info'
+    random_info = cache.get(info_cache_key)
+    if not random_info:
+        try:
+            random_info = InfoSerializer(choice(Info.objects.all())).data
+            cache.set(info_cache_key, random_info, timeout=86400)
+        except (IndexError):
+            random_info = {'아직 알려드릴 정보가 없네요'}
+    return random_info
 
 def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquor=[], like_liquor=[], hate_liquor=[]):
     """방텐더봇 function
