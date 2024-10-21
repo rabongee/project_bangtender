@@ -35,10 +35,10 @@ class CocktailListView(ListAPIView):
     def get(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
 
-        if 'liquor' != cache.get('cocktail_path'):
+        if request.get_full_path() == cache.get('cocktail_path') or not cache.get('cocktail_path'):
             cache.delete("liquor_path")
             cache.delete('random_info')
-            cache.set("cocktail_path", "liquor")
+            cache.set("cocktail_path", "/api/v1/cocktail/")
         response.data['info'] = get_info()
 
         if request.user:
