@@ -14,7 +14,6 @@ from rest_framework.permissions import IsAuthenticated
 from accounts.models import MyLiquor
 from .functions import btd_bot
 from django.core.cache import cache
-from collections import OrderedDict
 
 
 # Create your views here.
@@ -172,6 +171,7 @@ class RecordPagination(pagination.CursorPagination):
                     "next": self.get_next_link(),
                     "previous": self.get_previous_link(),
                     "records": data,
+                    "info": InfoSerializer(choice(Info.objects.all())).data
                 },
             },
             status=status.HTTP_200_OK,
