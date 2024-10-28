@@ -100,7 +100,7 @@ def btd_bot(question, message_history=[], model="gpt-3.5-turbo-1106", user_liquo
     return message_history
 
 
-# NEWMODULE: 파인튜닝 모델
+# TODO: 파인튜닝 모델
 # 파인 튜닝을 위한 데이터 예시
 # 파인튜닝에는 데이터가 최소 10개 필요
 # pre_prompt = {

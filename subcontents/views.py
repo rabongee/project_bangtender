@@ -53,8 +53,7 @@ class MainPageAPIView(APIView):
     * 비로그인 시
     response_seri['info' | 'cocktail_list']만 반환
 
-    """
-
+    """    
     def get(self, request):
         response_seri = {}
 
@@ -234,7 +233,7 @@ class BangtenderBot(APIView):
         return Response(new_history, status=status.HTTP_200_OK)
 
 
-# NEWMODULE: 파인튜닝 모델
+# TODO: 파인튜닝 모델
 # 파인튜닝 함수
 # class MyFineTuning(APIView):
 #     def post(self, request):

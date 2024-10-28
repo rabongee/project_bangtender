@@ -15,7 +15,7 @@ from liquor.models import Liquor
 from liquor.serializers import LiquorListSerializer
 from cocktail.models import Cocktail
 from cocktail.serializers import CocktailListSerializer
-
+from django.core.cache import cache
 
 class AccountView(APIView):
     """회원가입 및 회원탈퇴 APIView
@@ -208,6 +208,9 @@ class UserAPIView(APIView):
                             user=user, liquor_id__in=ids_to_remove, status=status_value).delete()
 
                 return Response(UserLiquorSerializer(user).data)
+            # 사용자 맞춤 칵테일 추천 캐시 데이터 삭제
+            cache_key = f'random_custom_liquor_{request.user.id}'
+            cache.delete(cache_key)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"message": "수정 권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
