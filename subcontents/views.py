@@ -53,13 +53,7 @@ class MainPageAPIView(APIView):
     * 비로그인 시
     response_seri['info' | 'cocktail_list']만 반환
 
-    """
-    
-
-    # 사용자의 고유한 캐시 키를 생성
-    def user_cache_key(request):
-        return f"user_cache_{request.user.id}"
-    
+    """    
     def get(self, request):
         response_seri = {}
 
@@ -107,7 +101,7 @@ class MainPageAPIView(APIView):
         # 가지고 있거나 좋아하는 술이 들어간 칵테일 혹은 같은 classification이 들어간 칵테일 랜덤으로 가져옴
         liquor_cache_key = f'random_custom_liquor_{request.user.id}'
         random_custom_liquor = cache.get(liquor_cache_key)
-        
+
         try:
             if not random_custom_liquor:
                 liquor_query = Q()
