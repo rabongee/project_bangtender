@@ -9,6 +9,6 @@ urlpatterns = [
     path('map/', views.UserAddressAPIView.as_view()),
 
 
-    # NEWMODULE: 파인튜닝 모델
+    # TODO: 파인튜닝 모델
     # path("fine-tuning/", views.MyFineTuning.as_view()),
 ]
