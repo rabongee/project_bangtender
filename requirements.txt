@@ -41,7 +41,7 @@ matplotlib-inline==0.1.7
 openai==1.50.0
 packaging==24.1
 parso==0.8.4
-pillow==10.4.0
+pillow==12.3.0
 prompt_toolkit==3.0.48
 psycopg2-binary==2.9.9
 pure_eval==0.2.3
